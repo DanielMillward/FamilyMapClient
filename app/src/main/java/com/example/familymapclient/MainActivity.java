@@ -42,8 +42,10 @@ public class MainActivity extends AppCompatActivity {
                             UserDataModel userData = (UserDataModel) message.obj;
                             if (userData.WasSuccess()) {
                                 //switch to map fragment, put data somewhere safe
+
                             } else {
                                 // put toast up with error
+                                System.out.println("Failed for some reason!");
                             }
                         }
                     };

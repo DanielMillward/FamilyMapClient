@@ -119,7 +119,7 @@ class Proxy {
             newConnection.setRequestMethod("POST");
             newConnection.setRequestProperty ("Authorization", authtoken);
             newConnection.connect();
-
+            //got a good result
             Person[] loginPersonResult;
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // Like before, but get inputStream
