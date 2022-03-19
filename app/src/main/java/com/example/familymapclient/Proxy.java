@@ -27,20 +27,23 @@ class Proxy {
     public UserDataModel getLoginRegisterData(boolean isLogin, String server, String port, LoginRequest loginRequest, RegisterRequest registerRequest) {
         try {
             //Viewmodel has an object of events and object of persons?
+            System.out.println("Calling getting data...");
             String baseAddress = server + ":" + port;
             String serverAddress;
             if (isLogin) {
-                serverAddress = baseAddress + "/login";
+                serverAddress = baseAddress + "/user/login";
             } else {
-                serverAddress = baseAddress + "/register";
+                serverAddress = baseAddress + "/user/register";
             }
             //Write our response body
+            //serverAddress = "http://google.com";
+            System.out.println("Server address is " + serverAddress);
             URL serverURL = new URL(serverAddress);
             HttpURLConnection connection = (HttpURLConnection) serverURL.openConnection();
             connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
-            OutputStream outStream = connection.getOutputStream();
-            OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, "UTF-8");
+            OutputStreamWriter outStreamWriter = new OutputStreamWriter(connection.getOutputStream());
             Gson gson = new Gson();
             //Add different things to request body depending on if we're logging in or registering
             if (isLogin) {
@@ -48,12 +51,14 @@ class Proxy {
             } else {
                 gson.toJson(registerRequest, outStreamWriter);
             }
+            System.out.println("Closing resources...");
             //finish up writing response body
             outStreamWriter.flush();
             outStreamWriter.close();
-            outStream.close();
             //send request
+            System.out.println("About to connect....");
             connection.connect();
+            System.out.println("Connected!");
             //we got a good response
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // Like before, but get inputStream
@@ -68,7 +73,8 @@ class Proxy {
                 }
                 //turn into string
                 String responseData = outputStream.toString();
-
+                System.out.println("The response to the login or register request:");
+                System.out.println(responseData);
                 //turn the string JSON into the object we need
                 if (isLogin) {
                     //ask server for person and event data, add that to viewmodel and return
@@ -83,9 +89,25 @@ class Proxy {
 
             } else {
                 //didn't get a 200, something was wrong about our input, do toast
+                System.out.println("Got a response, but not a 200: " + connection.getResponseCode());
+                // Like before, but get inputStream
+                InputStream responseBody = connection.getInputStream();
+
+                // Read the response bytes
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = responseBody.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, length);
+                }
+                //turn into string
+                String responseData = outputStream.toString();
+                System.out.println("message: " + responseData);
+
             }
         } catch (Exception e) {
             //something went wrong with connecting to the server
+            System.out.println("Couldn't connect to the server! message below for type " + e.getClass());
             System.out.println(e.getMessage());
         }
         return null;

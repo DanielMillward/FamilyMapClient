@@ -40,17 +40,39 @@ public class MainActivity extends AppCompatActivity {
                         public void handleMessage(Message message) {
                             super.handleMessage(message);
                             UserDataModel userData = (UserDataModel) message.obj;
-                            if (userData.WasSuccess()) {
-                                //switch to map fragment, put data somewhere safe
+                            if (userData != null) {
+                                if (userData.WasSuccess()) {
+                                    //switch to map fragment, put data somewhere safe
 
+                                } else {
+                                    // put toast up with error
+                                    System.out.println("Failed for some reason!");
+                                }
                             } else {
-                                // put toast up with error
-                                System.out.println("Failed for some reason!");
+                                System.out.println("userData was null!");
                             }
                         }
                     };
                     //set variables to pass to proxy
-                    String server = "localhost";
+                    //TODO: in cmd type ipconfig, put one of the addresses shown there, NOT 127.0.0.1!
+                    // Try using 10.0.2.2
+                    // If can't connect, you might have to allow an exception for the port in windows defender
+
+                    /*
+                    If doesn't work, in cmd type ipconfig and look for:
+
+                    Ethernet adapter Ethernet 2:
+
+                   Connection-specific DNS Suffix  . :
+                   Link-local IPv6 Address . . . . . : fe80::7037:a8b7:c36:f487%58
+                   IPv4 Address. . . . . . . . . . . : 192.168.249.92
+                            ^^^ This one ^^^^
+                   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+                   Default Gateway . . . . . . . . . : 192.168.249.144
+
+
+                     */
+                    String server = "http://192.168.249.92";
                     String port = "8080";
                     LoginRequest loginRequest = new LoginRequest("username", "password");
                     //get data on separate thread
@@ -64,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    //Called when button is clicked (on a new background thread)
     private static class GetUserDataTask implements Runnable {
 
         private final Handler messageHandler;
