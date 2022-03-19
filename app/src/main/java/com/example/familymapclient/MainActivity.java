@@ -41,9 +41,9 @@ public class MainActivity extends AppCompatActivity {
                             super.handleMessage(message);
                             UserDataModel userData = (UserDataModel) message.obj;
                             if (userData != null) {
-                                if (userData.WasSuccess()) {
+                                if (userData.wasSuccess()) {
                                     //switch to map fragment, put data somewhere safe
-
+                                    System.out.println("Got all the data! Now to do map fragment");
                                 } else {
                                     // put toast up with error
                                     System.out.println("Failed for some reason!");
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                      */
-                    String server = "http://192.168.249.92";
+                    String server = "http://10.37.0.250";
                     String port = "8080";
                     LoginRequest loginRequest = new LoginRequest("username", "password");
                     //get data on separate thread

@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import Models.Event;
 import Models.Person;
@@ -90,19 +91,6 @@ class Proxy {
             } else {
                 //didn't get a 200, something was wrong about our input, do toast
                 System.out.println("Got a response, but not a 200: " + connection.getResponseCode());
-                // Like before, but get inputStream
-                InputStream responseBody = connection.getInputStream();
-
-                // Read the response bytes
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = responseBody.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, length);
-                }
-                //turn into string
-                String responseData = outputStream.toString();
-                System.out.println("message: " + responseData);
 
             }
         } catch (Exception e) {
@@ -119,40 +107,50 @@ class Proxy {
             first part: Get event data
              */
             //Make and send an events request
+            System.out.println("Using authtoken: " + authtoken + " at address " + serverAddress);
             URL serverURL = new URL(serverAddress + "/event");
             HttpURLConnection connection = (HttpURLConnection) serverURL.openConnection();
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("GET");
             connection.setRequestProperty ("Authorization", authtoken);
             connection.connect();
-            //We got a good result
             Gson gson = new Gson();
-            Event[] loginEventResult;
+            ArrayList<Event> loginEventResult;
+            //We got a good result
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                System.out.println("Got response for EVENTS");
                 // Like before, but get inputStream
                 String eventsJSON = getJsonFromResponse(connection);
-                loginEventResult = (Event[]) gson.fromJson(eventsJSON, Event[].class);
-            } else {throw new Exception("Error getting events"); }
+                loginEventResult = gson.fromJson(eventsJSON, EventArray.class).getList();
+            } else {
+                System.out.println("Error getting events for person :(");
+                throw new Exception("Error getting events");
+            }
 
             /*
             second part: Get person data
              */
             //Make and send a Persons request
-            HttpURLConnection newConnection = (HttpURLConnection) serverURL.openConnection();
-            newConnection.setRequestMethod("POST");
+            String literalPersonURL = serverAddress + "/person";
+            URL personURL = new URL(literalPersonURL);
+            System.out.println("making connection to " + literalPersonURL);
+            HttpURLConnection newConnection = (HttpURLConnection) personURL.openConnection();
+            newConnection.setRequestMethod("GET");
             newConnection.setRequestProperty ("Authorization", authtoken);
             newConnection.connect();
             //got a good result
-            Person[] loginPersonResult;
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            ArrayList<Person> loginPersonResult;
+            if (newConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // Like before, but get inputStream
-                String personJSON = getJsonFromResponse(connection);
-                loginPersonResult = (Person[]) gson.fromJson(personJSON, Person[].class);
+                System.out.println("Got response for PERSONS");
+                String personJSON = getJsonFromResponse(newConnection);
+                loginPersonResult = gson.fromJson(personJSON, PersonArray.class).getList();
             } else {throw new Exception("Error getting persons"); }
 
             /*
             Third part: Making the UserData and sending it out
              */
             UserDataModel output = new UserDataModel(true, loginEventResult, loginPersonResult);
+            return output;
         } catch (Exception e) {
             //something went wrong with connecting to the server
             System.out.println(e.getMessage());

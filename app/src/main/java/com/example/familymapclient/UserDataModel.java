@@ -2,22 +2,25 @@ package com.example.familymapclient;
 
 import androidx.lifecycle.ViewModel;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import Models.Event;
 import Models.Person;
 
 public class UserDataModel extends ViewModel{
 
     private boolean wasSuccess;
-    private Event[] events;
-    private Person[] persons;
+    private ArrayList<Event> events;
+    private ArrayList<Person> persons;
 
-    public UserDataModel(boolean wasSuccess, Event[] events, Person[] persons) {
+    public UserDataModel(boolean wasSuccess, ArrayList<Event> events, ArrayList<Person> persons) {
         this.wasSuccess = wasSuccess;
         this.events = events;
         this.persons = persons;
     }
 
-    public boolean WasSuccess() {
+    public boolean wasSuccess() {
         return wasSuccess;
     }
 
@@ -25,19 +28,19 @@ public class UserDataModel extends ViewModel{
         this.wasSuccess = wasSuccess;
     }
 
-    public Event[] getEvents() {
+    public ArrayList<Event> getEvents() {
         return events;
     }
 
-    public void setEvents(Event[] events) {
+    public void setEvents(ArrayList<Event> events) {
         this.events = events;
     }
 
-    public Person[] getPersons() {
+    public ArrayList<Person> getPersons() {
         return persons;
     }
 
-    public void setPersons(Person[] persons) {
+    public void setPersons(ArrayList<Person> persons) {
         this.persons = persons;
     }
 }
