@@ -2,16 +2,21 @@ package com.example.familymapclient;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,11 +74,7 @@ public class LoginFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
         Button loginButton = (Button) view.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener()
@@ -81,7 +82,9 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v)
             {
-                boolean canAttemptLogin = checkForRequiredInfo(v);
+                System.out.println("Clicked the login Button");
+                boolean canAttemptLogin = checkForRequiredInfo(true);
+
                 if (canAttemptLogin) {
                     attemptLogin(view);
                 } else {
@@ -89,12 +92,54 @@ public class LoginFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
+
         return view;
+    }
+
+    private boolean checkForRequiredInfo(boolean isLogin) {
+        EditText host = (EditText) getView().findViewById(R.id.hostEditText);
+        EditText port = (EditText) getView().findViewById(R.id.portEditText);
+        EditText username = (EditText) getView().findViewById(R.id.usernameEditText);
+        EditText password = (EditText) getView().findViewById(R.id.passwordEditText);
+        EditText firstName = (EditText) getView().findViewById(R.id.firstNameEditText);
+        EditText lastName = (EditText) getView().findViewById(R.id.lastNameEditText);
+        RadioGroup gender = (RadioGroup) getView().findViewById(R.id.genderGroup);
+
+        boolean hasHost = host.getText().toString().equals("");
+        boolean hasPort = port.getText().toString().equals("");
+        boolean hasUsername = username.getText().toString().equals("");
+        boolean hasPassword = password.getText().toString().equals("");
+        boolean hasFirstName = firstName.getText().toString().equals("");
+        boolean hasLastName = lastName.getText().toString().equals("");
+        int hasGender = gender.getCheckedRadioButtonId();
+        if (isLogin) {
+            if (!hasHost && !hasPort && !hasUsername && !hasPassword) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (!hasHost && !hasPort && !hasUsername && !hasPassword && !hasFirstName && !hasLastName && (hasGender > 0)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     private void showToastIncomplete(View v) {
         //show that the thing is not complete
         System.out.println("Incomplete data! showing toast....");
+        Toast.makeText(getActivity(), "Missing information!",
+                Toast.LENGTH_LONG).show();
     }
 
     private void attemptLogin(View v) {
@@ -116,9 +161,9 @@ public class LoginFragment extends Fragment {
                             System.out.println("Got all the data! Now to do map fragment");
                             Fragment fragment = new MapFragment();
 
-                            FragmentManager fm = getParentFragmentManager();
-                            FragmentTransaction transaction = fm.beginTransaction();
+                            FragmentTransaction transaction = getFragmentManager().beginTransaction();
                             transaction.replace(R.id.fragmentContainer, fragment);
+                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             // put toast up with error
@@ -161,10 +206,6 @@ public class LoginFragment extends Fragment {
 
     }
 
-    private boolean checkForRequiredInfo(View v) {
-        System.out.println("Checking for required info....");
-        return true;
-    }
 
 
     //Called when button is clicked (on a new background thread)
