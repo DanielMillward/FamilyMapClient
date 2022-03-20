@@ -86,25 +86,36 @@ public class LoginFragment extends Fragment {
                 boolean canAttemptLogin = checkForRequiredInfo(true);
 
                 if (canAttemptLogin) {
+                    attemptConnect(true);
                     attemptLogin(view);
                 } else {
-                    showToastIncomplete(view);
+                    showToastIncomplete(view, "Did you put all the required info in?");
+                }
+            }
+        });
+
+        Button registerButton = (Button) view.findViewById(R.id.registerButton);
+        registerButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                System.out.println("Clicked the register Button");
+                boolean canAttemptRegister = checkForRequiredInfo(false);
+
+                if (canAttemptRegister) {
+                    attemptConnect(false);
+                } else {
+                    showToastIncomplete(view, "Did you put all the required info in?");
                 }
             }
         });
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    private void attemptConnect(boolean isLogin) {
+        //try to login and switch to map view
+        System.out.println("Attempting to login or register....");
 
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
-
-        return view;
-    }
-
-    private boolean checkForRequiredInfo(boolean isLogin) {
         EditText host = (EditText) getView().findViewById(R.id.hostEditText);
         EditText port = (EditText) getView().findViewById(R.id.portEditText);
         EditText username = (EditText) getView().findViewById(R.id.usernameEditText);
@@ -112,39 +123,22 @@ public class LoginFragment extends Fragment {
         EditText firstName = (EditText) getView().findViewById(R.id.firstNameEditText);
         EditText lastName = (EditText) getView().findViewById(R.id.lastNameEditText);
         RadioGroup gender = (RadioGroup) getView().findViewById(R.id.genderGroup);
+        EditText email = (EditText) getView().findViewById(R.id.emailEditText);
 
-        boolean hasHost = host.getText().toString().equals("");
-        boolean hasPort = port.getText().toString().equals("");
-        boolean hasUsername = username.getText().toString().equals("");
-        boolean hasPassword = password.getText().toString().equals("");
-        boolean hasFirstName = firstName.getText().toString().equals("");
-        boolean hasLastName = lastName.getText().toString().equals("");
-        int hasGender = gender.getCheckedRadioButtonId();
-        if (isLogin) {
-            if (!hasHost && !hasPort && !hasUsername && !hasPassword) {
-                return true;
-            } else {
-                return false;
-            }
+
+        String textHost = "http://" + host.getText().toString();
+        String textPort = port.getText().toString();
+        String textUsername = username.getText().toString();
+        String textPassword = password.getText().toString();
+        String textFirstName = firstName.getText().toString();
+        String textLastName = lastName.getText().toString();
+        String textEmail = email.getText().toString();
+        String textGender = null;
+        if (gender.getCheckedRadioButtonId() == R.id.maleButton) {
+            textGender = "m";
         } else {
-            if (!hasHost && !hasPort && !hasUsername && !hasPassword && !hasFirstName && !hasLastName && (hasGender > 0)) {
-                return true;
-            } else {
-                return false;
-            }
+            textGender = "f";
         }
-    }
-
-    private void showToastIncomplete(View v) {
-        //show that the thing is not complete
-        System.out.println("Incomplete data! showing toast....");
-        Toast.makeText(getActivity(), "Missing information!",
-                Toast.LENGTH_LONG).show();
-    }
-
-    private void attemptLogin(View v) {
-        //try to login and switch to map view
-        System.out.println("Attempting to login....");
 
         try {
 
@@ -161,16 +155,22 @@ public class LoginFragment extends Fragment {
                             System.out.println("Got all the data! Now to do map fragment");
                             Fragment fragment = new MapFragment();
 
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("userData", userData);
+                            fragment.setArguments(bundle);
+
                             FragmentTransaction transaction = getFragmentManager().beginTransaction();
                             transaction.replace(R.id.fragmentContainer, fragment);
                             transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             // put toast up with error
-                            System.out.println("Failed for some reason!");
+                            System.out.println("Connected, but Failed for some reason!");
+                            showToastIncomplete(getView(), "An error occured. Please contact customer support with the following error code: ISUCK");
                         }
                     } else {
                         System.out.println("userData was null!");
+                        showToastIncomplete(getView(), "An error occured. Please contact customer support with the following error code: IMA NOBODY");
                     }
                 }
             };
@@ -191,18 +191,87 @@ public class LoginFragment extends Fragment {
                    Subnet Mask . . . . . . . . . . . : 255.255.255.0
                    Default Gateway . . . . . . . . . : 192.168.249.144
 
+                    IGNORE BELOW?
+                    Or if can't find that, look for:
 
+                    Ethernet adapter vEthernet (WSL):
+
+                   Connection-specific DNS Suffix  . :
+                   Link-local IPv6 Address . . . . . : fe80::acac:3de3:c0f:c367%53
+                   IPv4 Address. . . . . . . . . . . : 172.22.128.1
+                            ^^^ This one ^^^
+                   Subnet Mask . . . . . . . . . . . : 255.255.240.0
+                   Default Gateway . . . . . . . . . :
                      */
-            String server = "http://10.37.0.250";
-            String port = "8080";
-            LoginRequest loginRequest = new LoginRequest("username", "password");
+            LoginRequest loginRequest = new LoginRequest(textUsername, textPassword);
+            RegisterRequest registerRequest = new RegisterRequest(textUsername, textPassword, textEmail, textFirstName, textLastName, textGender);
             //get data on separate thread
-            GetUserDataTask task = new GetUserDataTask(uiThreadMessageHandler,true, server, port, loginRequest, null);
+            GetUserDataTask task;
+            if (isLogin) {
+                task = new GetUserDataTask(uiThreadMessageHandler,true, textHost, textPort, loginRequest, null);
+            } else {
+                task = new GetUserDataTask(uiThreadMessageHandler,false, textHost, textPort, null, registerRequest);
+            }
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(task);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
+
+        return view;
+    }
+
+    private boolean checkForRequiredInfo(boolean isLogin) {
+        EditText host = (EditText) getView().findViewById(R.id.hostEditText);
+        EditText port = (EditText) getView().findViewById(R.id.portEditText);
+        EditText username = (EditText) getView().findViewById(R.id.usernameEditText);
+        EditText password = (EditText) getView().findViewById(R.id.passwordEditText);
+        EditText firstName = (EditText) getView().findViewById(R.id.firstNameEditText);
+        EditText lastName = (EditText) getView().findViewById(R.id.lastNameEditText);
+        EditText email = (EditText) getView().findViewById(R.id.emailEditText);
+        RadioGroup gender = (RadioGroup) getView().findViewById(R.id.genderGroup);
+
+        boolean hasHost = host.getText().toString().equals("");
+        boolean hasPort = port.getText().toString().equals("");
+        boolean hasUsername = username.getText().toString().equals("");
+        boolean hasPassword = password.getText().toString().equals("");
+        boolean hasFirstName = firstName.getText().toString().equals("");
+        boolean hasLastName = lastName.getText().toString().equals("");
+        boolean hasEmail = email.getText().toString().equals("");
+        int hasGender = gender.getCheckedRadioButtonId();
+        if (isLogin) {
+            if (!hasHost && !hasPort && !hasUsername && !hasPassword) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (!hasHost && !hasPort && !hasUsername && !hasPassword && !hasFirstName && !hasLastName && !hasEmail && (hasGender > 0)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private void showToastIncomplete(View v, String message) {
+        //show that the thing is not complete
+        System.out.println("Incomplete data! showing toast....");
+        Toast.makeText(getActivity(), message,
+                Toast.LENGTH_LONG).show();
+    }
+
+    private void attemptLogin(View v) {
+
 
     }
 
@@ -229,7 +298,9 @@ public class LoginFragment extends Fragment {
 
         @Override
         public void run() {
+            System.out.println("Task is being run");
             Proxy httpProxy = new Proxy();
+            System.out.println("Proxy made");
             //send off request to server
             UserDataModel userData = httpProxy.getLoginRegisterData(isLogin, server, port, loginRequest,registerRequest);
             //send off the data to the activity

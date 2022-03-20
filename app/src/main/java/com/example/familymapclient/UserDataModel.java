@@ -2,13 +2,14 @@ package com.example.familymapclient;
 
 import androidx.lifecycle.ViewModel;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import Models.Event;
 import Models.Person;
 
-public class UserDataModel extends ViewModel{
+public class UserDataModel extends ViewModel implements Serializable {
 
     private boolean wasSuccess;
     private ArrayList<Event> events;

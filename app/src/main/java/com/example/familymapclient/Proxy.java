@@ -62,6 +62,8 @@ class Proxy {
             System.out.println("Connected!");
             //we got a good response
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                //TODO: Put below in its own function
+
                 // Like before, but get inputStream
                 InputStream responseBody = connection.getInputStream();
 
@@ -91,7 +93,7 @@ class Proxy {
             } else {
                 //didn't get a 200, something was wrong about our input, do toast
                 System.out.println("Got a response, but not a 200: " + connection.getResponseCode());
-
+                return new UserDataModel(false, null, null);
             }
         } catch (Exception e) {
             //something went wrong with connecting to the server
@@ -122,8 +124,8 @@ class Proxy {
                 String eventsJSON = getJsonFromResponse(connection);
                 loginEventResult = gson.fromJson(eventsJSON, EventArray.class).getList();
             } else {
-                System.out.println("Error getting events for person :(");
-                throw new Exception("Error getting events");
+                System.out.println("Connected, but got an error getting events for person :(");
+                return new UserDataModel(false, null,null);
             }
 
             /*
@@ -144,7 +146,9 @@ class Proxy {
                 System.out.println("Got response for PERSONS");
                 String personJSON = getJsonFromResponse(newConnection);
                 loginPersonResult = gson.fromJson(personJSON, PersonArray.class).getList();
-            } else {throw new Exception("Error getting persons"); }
+            } else {
+                return new UserDataModel(false, null, null);
+            }
 
             /*
             Third part: Making the UserData and sending it out
@@ -154,6 +158,7 @@ class Proxy {
         } catch (Exception e) {
             //something went wrong with connecting to the server
             System.out.println(e.getMessage());
+
         }
         return null;
     }

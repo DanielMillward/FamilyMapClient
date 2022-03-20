@@ -2,11 +2,15 @@ package com.example.familymapclient;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
+import Models.User;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +18,35 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class MapFragment extends Fragment {
+    UserDataModel userData;
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        // here you have the reference of your button
+        Bundle bundle = getArguments();
+        userData = (UserDataModel) bundle.getSerializable("userData");
+        System.out.println("Recieved user data success is " + userData.wasSuccess() +
+                " with events length " + userData.getEvents().size() + " and people length " + userData.getPersons().size());
+        /*
+                Button loginButton = (Button) view.findViewById(R.id.loginButton);
+        loginButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                System.out.println("Clicked the login Button");
+                boolean canAttemptLogin = checkForRequiredInfo(true);
+
+                if (canAttemptLogin) {
+                    attemptLogin(view);
+                } else {
+                    showToastIncomplete(view);
+                }
+            }
+        });
+         */
+    }
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
