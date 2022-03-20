@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -87,7 +88,6 @@ public class LoginFragment extends Fragment {
 
                 if (canAttemptLogin) {
                     attemptConnect(true);
-                    attemptLogin(view);
                 } else {
                     showToastIncomplete(view, "Did you put all the required info in?");
                 }
@@ -148,9 +148,9 @@ public class LoginFragment extends Fragment {
                 @Override
                 public void handleMessage(Message message) {
                     super.handleMessage(message);
-                    UserDataModel userData = (UserDataModel) message.obj;
+                    FullUser userData = (FullUser) message.obj;
                     if (userData != null) {
-                        if (userData.wasSuccess()) {
+                        if (userData.getUserData().wasSuccess()) {
                             //switch to map fragment, put data somewhere safe
                             System.out.println("Got all the data! Now to do map fragment");
                             Fragment fragment = new MapFragment();
@@ -302,12 +302,12 @@ public class LoginFragment extends Fragment {
             Proxy httpProxy = new Proxy();
             System.out.println("Proxy made");
             //send off request to server
-            UserDataModel userData = httpProxy.getLoginRegisterData(isLogin, server, port, loginRequest,registerRequest);
+            FullUser userData = httpProxy.getLoginRegisterData(isLogin, server, port, loginRequest,registerRequest);
             //send off the data to the activity
             sendMessage(userData);
         }
 
-        private void sendMessage(UserDataModel userData) {
+        private void sendMessage(FullUser userData) {
             Message message = Message.obtain();
             //set obj parameter of message to the userdata
             message.obj = userData;

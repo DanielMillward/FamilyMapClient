@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
+import Models.Event;
 import Models.User;
 
 /**
@@ -18,15 +20,38 @@ import Models.User;
  * create an instance of this fragment.
  */
 public class MapFragment extends Fragment {
+    FullUser userInfo;
     UserDataModel userData;
-
+    String firstName;
+    String lastName;
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
         Bundle bundle = getArguments();
-        userData = (UserDataModel) bundle.getSerializable("userData");
+        userInfo= (FullUser) bundle.getSerializable("userData");
+        userData = userInfo.getUserData();
         System.out.println("Recieved user data success is " + userData.wasSuccess() +
                 " with events length " + userData.getEvents().size() + " and people length " + userData.getPersons().size());
+
+        /*
+        //Look through all events, find the user birth, then find user's name from the matching personID.
+        for (int i = 0; i < userData.getEvents().size(); ++i) {
+            Event currEvent = userData.getEvents().get(i);
+            if (userData.getEvents().get(i).getYear() == 2000) {
+                for (int j = 0; j < userData.getPersons().size(); ++i) {
+                    //If the event with year 2000 (default year for user birth) matches personID with a person
+                    if (userData.getPersons().get(j).getPersonID().equals(currEvent.getPersonID())) {
+                        firstName = userData.getPersons().get(j).getFirstName();
+                        lastName = userData.getPersons().get(j).getLastName();
+                    }
+                }
+            }
+        }
+         */
+
+        String message = "Welcome, " + userInfo.getUserFirstName() + " " + userInfo.getUserLastName()+ "!";
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+
         /*
                 Button loginButton = (Button) view.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener()

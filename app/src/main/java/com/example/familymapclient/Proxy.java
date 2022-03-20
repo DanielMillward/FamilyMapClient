@@ -25,7 +25,7 @@ class Proxy {
 
     //private static final String LOG_TAG = "ClientProxy";
 
-    public UserDataModel getLoginRegisterData(boolean isLogin, String server, String port, LoginRequest loginRequest, RegisterRequest registerRequest) {
+    public FullUser getLoginRegisterData(boolean isLogin, String server, String port, LoginRequest loginRequest, RegisterRequest registerRequest) {
         try {
             //Viewmodel has an object of events and object of persons?
             System.out.println("Calling getting data...");
@@ -82,18 +82,18 @@ class Proxy {
                 if (isLogin) {
                     //ask server for person and event data, add that to viewmodel and return
                     LoginResult loginResult = (LoginResult) gson.fromJson(responseData, LoginResult.class);
-                    return askServerForData(loginResult.getAuthtoken(), baseAddress);
+                    return askServerForData(loginResult.getAuthtoken(), baseAddress, loginResult.getPersonID());
 
                 } else {
                     //ask server for person and event data, add that to viewmodel and return
                     RegisterResult registerResult = (RegisterResult) gson.fromJson(responseData,RegisterResult.class);
-                    return askServerForData(registerResult.getAuthtoken(), baseAddress);
+                    return askServerForData(registerResult.getAuthtoken(), baseAddress, registerResult.getPersonID());
                 }
 
             } else {
                 //didn't get a 200, something was wrong about our input, do toast
                 System.out.println("Got a response, but not a 200: " + connection.getResponseCode());
-                return new UserDataModel(false, null, null);
+                return new FullUser(null, null, new UserDataModel(false, null, null));
             }
         } catch (Exception e) {
             //something went wrong with connecting to the server
@@ -103,7 +103,7 @@ class Proxy {
         return null;
     }
 
-    private UserDataModel askServerForData(String authtoken, String serverAddress) {
+    private FullUser askServerForData(String authtoken, String serverAddress, String userID) {
         try {
             /*
             first part: Get event data
@@ -125,7 +125,7 @@ class Proxy {
                 loginEventResult = gson.fromJson(eventsJSON, EventArray.class).getList();
             } else {
                 System.out.println("Connected, but got an error getting events for person :(");
-                return new UserDataModel(false, null,null);
+                return new FullUser(null, null, new UserDataModel(false, null, null));
             }
 
             /*
@@ -147,13 +147,23 @@ class Proxy {
                 String personJSON = getJsonFromResponse(newConnection);
                 loginPersonResult = gson.fromJson(personJSON, PersonArray.class).getList();
             } else {
-                return new UserDataModel(false, null, null);
+                return new FullUser(null, null, new UserDataModel(false, null, null));
             }
 
             /*
             Third part: Making the UserData and sending it out
              */
-            UserDataModel output = new UserDataModel(true, loginEventResult, loginPersonResult);
+            //Actually before that get the user's name
+            String userFirstName = null;
+            String userLastName = null;
+            for (Person person : loginPersonResult) {
+                if (person.getPersonID().equals(userID)) {
+                    userFirstName = person.getFirstName();
+                    userLastName = person.getLastName();
+                }
+            }
+
+            FullUser output = new FullUser(userFirstName, userLastName, new UserDataModel(true, loginEventResult, loginPersonResult));
             return output;
         } catch (Exception e) {
             //something went wrong with connecting to the server
