@@ -1,5 +1,7 @@
 package com.example.familymapclient;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -240,6 +242,8 @@ public class LoginFragment extends Fragment implements OnMapReadyCallback {
                             bundle.putSerializable("userData", userData);
                             fragment.setArguments(bundle);
 
+                            setDefaultPreferences();
+
                             FragmentTransaction transaction = getFragmentManager().beginTransaction();
                             transaction.replace(R.id.fragmentContainer, fragment);
                             transaction.addToBackStack(null);
@@ -298,6 +302,19 @@ public class LoginFragment extends Fragment implements OnMapReadyCallback {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private void setDefaultPreferences() {
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("LIFE_STORY_LINES", true);
+        editor.putBoolean("FAMILY_TREE_LINES", true);
+        editor.putBoolean("SPOUSE_LINES", true);
+        editor.putBoolean("FATHERS_SIDE", true);
+        editor.putBoolean("MOTHERS_SIDE", true);
+        editor.putBoolean("MALE_EVENTS", true);
+        editor.putBoolean("FEMALE_EVENTS", true);
+        editor.apply();
     }
 
 

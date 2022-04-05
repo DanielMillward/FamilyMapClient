@@ -1,5 +1,7 @@
 package com.example.familymapclient;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,10 +18,18 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import Models.Event;
+import Models.Person;
 import Models.User;
 
 /**
@@ -32,11 +42,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     UserDataModel userData;
     String firstName;
     String lastName;
+    float markerColors[];
+    PersonBinaryTree personBinaryTree;
+    Map<String, Person> personMap;
+
 
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
+
+        personMap = new HashMap<>();
+
+        markerColors = new float[10];
+        markerColors[0] = BitmapDescriptorFactory.HUE_RED;
+        markerColors[1] = BitmapDescriptorFactory.HUE_BLUE;
+        markerColors[2] = BitmapDescriptorFactory.HUE_CYAN;
+        markerColors[3] = BitmapDescriptorFactory.HUE_GREEN;
+        markerColors[4] = BitmapDescriptorFactory.HUE_MAGENTA;
+        markerColors[5] = BitmapDescriptorFactory.HUE_ORANGE;
+        markerColors[6] = BitmapDescriptorFactory.HUE_AZURE;
+        markerColors[7] = BitmapDescriptorFactory.HUE_ROSE;
+        markerColors[8] = BitmapDescriptorFactory.HUE_VIOLET;
+        markerColors[9] = BitmapDescriptorFactory.HUE_YELLOW;
+
+
         Bundle bundle = getArguments();
         userInfo= (FullUser) bundle.getSerializable("userData");
         userData = userInfo.getUserData();
@@ -49,6 +79,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         SupportMapFragment mapFragment= (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        fillPersonBinaryTree(userData.getPersons(), userInfo.getUserFirstName(), userInfo.getUserLastName());
+    }
+
+    private void fillPersonBinaryTree(ArrayList<Person> persons, String firstName, String lastName) {
+        Person user = null;
+        String fatherID;
+        String motherID;
+
+
+        for (Person person : persons) {
+            //find original user
+            if (person.getFirstName() == firstName && person.getLastName() == lastName) {
+                user = person;
+                fatherID = person.getFatherID();
+                motherID = person.getMotherID();
+            }
+            //convert arraylist to dictionary for easier access
+            personMap.put(person.getPersonID(), person);
+        }
+
+        personBinaryTree = new PersonBinaryTree(user, true);
+        addParents(personBinaryTree);
+    }
+
+    private void addParents(PersonBinaryTree tree) {
+        if (tree.getPerson().getFatherID() == null || tree.getPerson().getMotherID() == null) {
+            return;
+        } else {
+            Person father = personMap.get(tree.getPerson().getFatherID());
+            PersonBinaryTree fatherTree = tree.setLeft(new PersonBinaryTree(father, true));
+            addParents(fatherTree);
+            Person mother = personMap.get(tree.getPerson().getMotherID());
+            PersonBinaryTree motherTree = tree.setRight(new PersonBinaryTree(mother, true));
+            addParents(motherTree);
+        }
     }
 
 
@@ -105,7 +171,140 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         GoogleMap map = googleMap;
         // Add a marker in Sydney and move the camera
         LatLng sydney= new LatLng(-34,  151);
-        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+
         map.animateCamera(CameraUpdateFactory.newLatLng(sydney));
+        addEventsToMap(map);
+        map.setOnMarkerClickListener(new MyMarkerListener());
+    }
+
+    private void addEventsToMap(GoogleMap map) {
+        //Use data to put all events there
+        //use setTag to pass in the event object
+        LatLng sydney= new LatLng(-34,  151);
+        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+
+
+
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", true);
+        boolean displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", true);
+        boolean displayMale = sharedPref.getBoolean("MALE_EVENTS", true);
+        boolean displayFemale = sharedPref.getBoolean("FEMALE_EVENTS", true);
+
+        //TODO: Based on these bools and the tree previously made, decide which ones are displayed
+        if (!displayFatherSide) {
+            //set the isDisplayed of the person node to false
+            setPersonTreeNodesFalse("father", personBinaryTree);
+        }
+        if (!displayMotherSide) {
+            setPersonTreeNodesFalse("mother", personBinaryTree);
+        }
+        if (!displayMale) {
+            setPersonTreeNodesFalse("male", personBinaryTree);
+        }
+        if (!displayFemale) {
+            setPersonTreeNodesFalse("female", personBinaryTree);
+        }
+
+        //get the events for the persons that are to be displayed
+        ArrayList<Event> displayEvents = new ArrayList<>();
+        getDisplayEvents(personBinaryTree, displayEvents, userData.getEvents());
+
+
+        //events already with a color
+        Map<String, Float> usedEvents = new HashMap<>();
+        int colorCounter = 0;
+        //make list of events that the settings tell us to use
+        ArrayList<Event> displayedEvents = new ArrayList<>();
+
+        for (Event event : displayEvents){
+            //if event Type has not been assigned a color already, set a new one/reuse, else use set
+            if (usedEvents.containsKey(event.getEventType())) {
+                //already have a color, assign it
+                Marker  marker = map.addMarker(new MarkerOptions().
+                        position(new LatLng(event.getLatitude(), event.getLongitude())).
+                        icon(BitmapDescriptorFactory.defaultMarker(usedEvents.get(event.getEventType()))));
+                marker.setTag(event);
+            } else {
+                //put new color next to it
+                usedEvents.put(event.getEventType(), markerColors[colorCounter]);
+                Marker  marker = map.addMarker(new MarkerOptions().
+                        position(new LatLng(event.getLatitude(), event.getLongitude())).
+                        icon(BitmapDescriptorFactory.defaultMarker(usedEvents.get(event.getEventType()))));
+                marker.setTag(event);
+                colorCounter++;
+            }
+        }
+    }
+
+    private void getDisplayEvents(PersonBinaryTree tree, ArrayList<Event> output, ArrayList<Event> events) {
+        //go through tree, if it's to be displayed then for every event for this person add to output
+        if (tree.isDisplayed()) {
+            for (Event event : events) {
+                if (event.getPersonID().equals(tree.getPerson().getPersonID())) {
+                    output.add(event);
+                }
+            }
+        }
+        if (tree.getLeft() != null) {
+            getDisplayEvents(tree.getLeft(), output, events);
+        }
+        if (tree.getRight() != null) {
+            getDisplayEvents(tree.getRight(), output, events);
+        }
+
+    }
+
+    private void setPersonTreeNodesFalse(String nodeType, PersonBinaryTree tree) {
+        //goes through tree and deletes the respective nodes based on the settings
+        if (nodeType.equals("father")) {
+            if (tree.getLeft() != null) {
+                tree.getLeft().setDisplayed(false);
+                setPersonTreeNodesFalse("father", tree.getLeft().getLeft());
+            }
+        } else if (nodeType.equals("mother")) {
+            if (tree.getRight() != null) {
+                tree.getRight().setDisplayed(false);
+                setPersonTreeNodesFalse("mother", tree.getRight().getRight());
+            }
+        } else if (nodeType.equals("male")) {
+            if (tree.getRight() != null) {
+                if (tree.getRight().getPerson().getGender().equals("m")) {
+                    tree.getRight().setDisplayed(false);
+                }
+                setPersonTreeNodesFalse("male", tree.getRight().getRight());
+            }
+            if (tree.getLeft() != null) {
+                if (tree.getLeft().getPerson().getGender().equals("m")) {
+                    tree.getLeft().setDisplayed(false);
+                }
+                setPersonTreeNodesFalse("male", tree.getRight().getRight());
+            }
+        } else if (nodeType.equals("female")) {
+            if (tree.getRight() != null) {
+                if (tree.getRight().getPerson().getGender().equals("f")) {
+                    tree.getRight().setDisplayed(false);
+                }
+                setPersonTreeNodesFalse("female", tree.getRight().getRight());
+            }
+            if (tree.getLeft() != null) {
+                if (tree.getLeft().getPerson().getGender().equals("f")) {
+                    tree.getLeft().setDisplayed(false);
+                }
+                setPersonTreeNodesFalse("female", tree.getRight().getRight());
+            }
+        }
+    }
+
+
+    private class MyMarkerListener implements GoogleMap.OnMarkerClickListener {
+
+
+        @Override
+        public boolean onMarkerClick(@NonNull Marker marker) {
+            //use the tag of the marker to tell what event object it was
+            //pass the shared preferences to the thingy
+            return false;
+        }
     }
 }
