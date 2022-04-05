@@ -45,6 +45,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     float markerColors[];
     PersonBinaryTree personBinaryTree;
     Map<String, Person> personMap;
+    ArrayList<Marker> displayedMarkers;
 
 
 
@@ -53,6 +54,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         // here you have the reference of your button
 
         personMap = new HashMap<>();
+        displayedMarkers = new ArrayList<>();
 
         markerColors = new float[10];
         markerColors[0] = BitmapDescriptorFactory.HUE_RED;
@@ -173,6 +175,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         LatLng sydney= new LatLng(-34,  151);
 
         map.animateCamera(CameraUpdateFactory.newLatLng(sydney));
+        System.out.println("About to add stuff to map!");
         addEventsToMap(map);
         map.setOnMarkerClickListener(new MyMarkerListener());
     }
@@ -186,18 +189,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", true);
-        boolean displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", true);
+        boolean displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", false);
+        boolean displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", false);
         boolean displayMale = sharedPref.getBoolean("MALE_EVENTS", true);
         boolean displayFemale = sharedPref.getBoolean("FEMALE_EVENTS", true);
 
         //TODO: Based on these bools and the tree previously made, decide which ones are displayed
+        System.out.println("About to delete some nodes");
         if (!displayFatherSide) {
             //set the isDisplayed of the person node to false
-            setPersonTreeNodesFalse("father", personBinaryTree);
+            setPersonTreeNodesFalse("father", personBinaryTree.getLeft());
         }
         if (!displayMotherSide) {
-            setPersonTreeNodesFalse("mother", personBinaryTree);
+            setPersonTreeNodesFalse("mother", personBinaryTree.getRight());
         }
         if (!displayMale) {
             setPersonTreeNodesFalse("male", personBinaryTree);
@@ -225,6 +229,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                         position(new LatLng(event.getLatitude(), event.getLongitude())).
                         icon(BitmapDescriptorFactory.defaultMarker(usedEvents.get(event.getEventType()))));
                 marker.setTag(event);
+                displayedMarkers.add(marker);
             } else {
                 //put new color next to it
                 usedEvents.put(event.getEventType(), markerColors[colorCounter]);
@@ -232,6 +237,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                         position(new LatLng(event.getLatitude(), event.getLongitude())).
                         icon(BitmapDescriptorFactory.defaultMarker(usedEvents.get(event.getEventType()))));
                 marker.setTag(event);
+                displayedMarkers.add(marker);
                 colorCounter++;
             }
         }
@@ -257,41 +263,56 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     private void setPersonTreeNodesFalse(String nodeType, PersonBinaryTree tree) {
         //goes through tree and deletes the respective nodes based on the settings
+        if (tree == null) return;
         if (nodeType.equals("father")) {
-            if (tree.getLeft() != null) {
+            tree.setDisplayed(false);
+            if (tree.left != null && tree.right != null) {
                 tree.getLeft().setDisplayed(false);
-                setPersonTreeNodesFalse("father", tree.getLeft().getLeft());
+                tree.getRight().setDisplayed(false);
+                System.out.println("Disabled person " + tree.getPerson().getFirstName() + " " + tree.getPerson().getLastName());
+                setPersonTreeNodesFalse("father", tree.getLeft());
+                setPersonTreeNodesFalse("father", tree.getRight());
             }
         } else if (nodeType.equals("mother")) {
-            if (tree.getRight() != null) {
+            tree.setDisplayed(false);
+            if (tree.left != null && tree.right != null) {
+                tree.getLeft().setDisplayed(false);
                 tree.getRight().setDisplayed(false);
-                setPersonTreeNodesFalse("mother", tree.getRight().getRight());
+                System.out.println("Disabled person " + tree.getPerson().getFirstName() + " " + tree.getPerson().getLastName());
+                setPersonTreeNodesFalse("mother", tree.getLeft());
+                setPersonTreeNodesFalse("mother", tree.getRight());
             }
         } else if (nodeType.equals("male")) {
+            if (tree.getPerson().getGender().equals("m")) {
+                tree.setDisplayed(false);
+            }
             if (tree.getRight() != null) {
                 if (tree.getRight().getPerson().getGender().equals("m")) {
                     tree.getRight().setDisplayed(false);
                 }
-                setPersonTreeNodesFalse("male", tree.getRight().getRight());
+                setPersonTreeNodesFalse("male", tree.getRight());
             }
             if (tree.getLeft() != null) {
                 if (tree.getLeft().getPerson().getGender().equals("m")) {
                     tree.getLeft().setDisplayed(false);
                 }
-                setPersonTreeNodesFalse("male", tree.getRight().getRight());
+                setPersonTreeNodesFalse("male", tree.getLeft());
             }
         } else if (nodeType.equals("female")) {
+            if (tree.getPerson().getGender().equals("f")) {
+                tree.setDisplayed(false);
+            }
             if (tree.getRight() != null) {
                 if (tree.getRight().getPerson().getGender().equals("f")) {
                     tree.getRight().setDisplayed(false);
                 }
-                setPersonTreeNodesFalse("female", tree.getRight().getRight());
+                setPersonTreeNodesFalse("female", tree.getRight());
             }
             if (tree.getLeft() != null) {
                 if (tree.getLeft().getPerson().getGender().equals("f")) {
                     tree.getLeft().setDisplayed(false);
                 }
-                setPersonTreeNodesFalse("female", tree.getRight().getRight());
+                setPersonTreeNodesFalse("female", tree.getLeft());
             }
         }
     }
