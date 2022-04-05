@@ -11,6 +11,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FamilyMapClient"
         android:usesCleartextTraffic="true">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDDYd4Nb5Z4S2zETQIyifMsWDKaji2WiSM" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

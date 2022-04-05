@@ -2,6 +2,7 @@ package com.example.familymapclient;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -11,6 +12,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import Models.Event;
 import Models.User;
 
@@ -19,11 +27,13 @@ import Models.User;
  * Use the {@link MapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements OnMapReadyCallback{
     FullUser userInfo;
     UserDataModel userData;
     String firstName;
     String lastName;
+
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
@@ -33,43 +43,12 @@ public class MapFragment extends Fragment {
         System.out.println("Recieved user data success is " + userData.wasSuccess() +
                 " with events length " + userData.getEvents().size() + " and people length " + userData.getPersons().size());
 
-        /*
-        //Look through all events, find the user birth, then find user's name from the matching personID.
-        for (int i = 0; i < userData.getEvents().size(); ++i) {
-            Event currEvent = userData.getEvents().get(i);
-            if (userData.getEvents().get(i).getYear() == 2000) {
-                for (int j = 0; j < userData.getPersons().size(); ++i) {
-                    //If the event with year 2000 (default year for user birth) matches personID with a person
-                    if (userData.getPersons().get(j).getPersonID().equals(currEvent.getPersonID())) {
-                        firstName = userData.getPersons().get(j).getFirstName();
-                        lastName = userData.getPersons().get(j).getLastName();
-                    }
-                }
-            }
-        }
-         */
 
         String message = "Welcome, " + userInfo.getUserFirstName() + " " + userInfo.getUserLastName()+ "!";
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
 
-        /*
-                Button loginButton = (Button) view.findViewById(R.id.loginButton);
-        loginButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                System.out.println("Clicked the login Button");
-                boolean canAttemptLogin = checkForRequiredInfo(true);
-
-                if (canAttemptLogin) {
-                    attemptLogin(view);
-                } else {
-                    showToastIncomplete(view);
-                }
-            }
-        });
-         */
+        SupportMapFragment mapFragment= (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
 
@@ -118,5 +97,15 @@ public class MapFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false);
+    }
+
+    //The one that actually does the work!
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        GoogleMap map = googleMap;
+        // Add a marker in Sydney and move the camera
+        LatLng sydney= new LatLng(-34,  151);
+        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        map.animateCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 }

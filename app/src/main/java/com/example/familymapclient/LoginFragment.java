@@ -2,6 +2,7 @@ package com.example.familymapclient;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -10,6 +11,8 @@ import androidx.fragment.app.FragmentTransaction;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +20,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -30,16 +38,72 @@ import RequestResult.RegisterRequest;
  * Use the {@link LoginFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LoginFragment extends Fragment {
+public class LoginFragment extends Fragment implements OnMapReadyCallback {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    EditText host;
+    EditText port;
+    EditText username;
+    EditText password;
+    EditText firstName;
+    EditText lastName;
+    RadioGroup gender;
+    EditText email;
+
+    Button loginButton;
+    Button registerButton;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+
+
+    }
+
+    private TextWatcher textWatcher = new TextWatcher() {
+
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            enableDisableButtons();
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+
+    private void enableDisableButtons() {
+        boolean canLogin = checkForRequiredInfo(true);
+        boolean canRegister = checkForRequiredInfo(false);
+        if (canLogin) {
+            loginButton.setEnabled(true);
+        } else {
+            loginButton.setEnabled(false);
+        }
+        if (canRegister) {
+            registerButton.setEnabled(true);
+        } else {
+            registerButton.setEnabled(false);
+        }
+    }
 
     public LoginFragment() {
         // Required empty public constructor
@@ -63,21 +127,45 @@ public class LoginFragment extends Fragment {
         return fragment;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
-
-    }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
-        Button loginButton = (Button) view.findViewById(R.id.loginButton);
+        host = (EditText) getView().findViewById(R.id.hostEditText);
+        port = (EditText) getView().findViewById(R.id.portEditText);
+        username = (EditText) getView().findViewById(R.id.usernameEditText);
+        password = (EditText) getView().findViewById(R.id.passwordEditText);
+        firstName = (EditText) getView().findViewById(R.id.firstNameEditText);
+        lastName = (EditText) getView().findViewById(R.id.lastNameEditText);
+        gender = (RadioGroup) getView().findViewById(R.id.genderGroup);
+        email = (EditText) getView().findViewById(R.id.emailEditText);
+
+        loginButton = (Button) getView().findViewById(R.id.loginButton);
+        registerButton = (Button) getView().findViewById(R.id.registerButton);
+
+
+
+        loginButton.setEnabled(false);
+        registerButton.setEnabled(false);
+
+        host.addTextChangedListener(textWatcher);
+        port.addTextChangedListener(textWatcher);
+        username.addTextChangedListener(textWatcher);
+        password.addTextChangedListener(textWatcher);
+        firstName.addTextChangedListener(textWatcher);
+        lastName.addTextChangedListener(textWatcher);
+        email.addTextChangedListener(textWatcher);
+
+        gender.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                enableDisableButtons();
+            }
+        });
+
         loginButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -94,7 +182,7 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        Button registerButton = (Button) view.findViewById(R.id.registerButton);
+
         registerButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -116,14 +204,7 @@ public class LoginFragment extends Fragment {
         //try to login and switch to map view
         System.out.println("Attempting to login or register....");
 
-        EditText host = (EditText) getView().findViewById(R.id.hostEditText);
-        EditText port = (EditText) getView().findViewById(R.id.portEditText);
-        EditText username = (EditText) getView().findViewById(R.id.usernameEditText);
-        EditText password = (EditText) getView().findViewById(R.id.passwordEditText);
-        EditText firstName = (EditText) getView().findViewById(R.id.firstNameEditText);
-        EditText lastName = (EditText) getView().findViewById(R.id.lastNameEditText);
-        RadioGroup gender = (RadioGroup) getView().findViewById(R.id.genderGroup);
-        EditText email = (EditText) getView().findViewById(R.id.emailEditText);
+
 
 
         String textHost = "http://" + host.getText().toString();
@@ -231,14 +312,6 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean checkForRequiredInfo(boolean isLogin) {
-        EditText host = (EditText) getView().findViewById(R.id.hostEditText);
-        EditText port = (EditText) getView().findViewById(R.id.portEditText);
-        EditText username = (EditText) getView().findViewById(R.id.usernameEditText);
-        EditText password = (EditText) getView().findViewById(R.id.passwordEditText);
-        EditText firstName = (EditText) getView().findViewById(R.id.firstNameEditText);
-        EditText lastName = (EditText) getView().findViewById(R.id.lastNameEditText);
-        EditText email = (EditText) getView().findViewById(R.id.emailEditText);
-        RadioGroup gender = (RadioGroup) getView().findViewById(R.id.genderGroup);
 
         boolean hasHost = host.getText().toString().equals("");
         boolean hasPort = port.getText().toString().equals("");
@@ -275,6 +348,13 @@ public class LoginFragment extends Fragment {
 
     }
 
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("Marker"));
+
+    }
 
 
     //Called when button is clicked (on a new background thread)

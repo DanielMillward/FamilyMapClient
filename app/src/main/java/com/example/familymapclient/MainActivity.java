@@ -1,5 +1,6 @@
 package com.example.familymapclient;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -12,6 +13,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
@@ -20,7 +26,7 @@ import java.util.concurrent.Executors;
 import RequestResult.LoginRequest;
 import RequestResult.RegisterRequest;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String USER_DATA_KEY = "UserDataKey";
 
@@ -41,5 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("Marker"));
 
+    }
 }
