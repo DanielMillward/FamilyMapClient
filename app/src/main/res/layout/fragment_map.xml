@@ -1,23 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <fragment
         android:id="@+id/map"
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/mapTextView"/>
+        android:layout_above="@id/eventInfo"/>
 
-    <TextView
-        android:id="@+id/mapTextView"
+    <androidx.gridlayout.widget.GridLayout
+        android:id="@+id/eventInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="My message"
         android:layout_alignParentBottom="true"
-        android:textAlignment="center"/>
+        app:columnCount="2"
+        app:rowCount="2">
+
+        <ImageView
+            android:id="@+id/personPic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50dp"
+            app:layout_column="0"
+            app:layout_row="0"
+            app:layout_rowSpan="2"
+            android:src="@android:drawable/btn_star_big_on"
+            app:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/personInfoText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Click on a marker to see"
+            app:layout_column="1"
+            app:layout_row="0"
+            android:layout_marginTop="20dp"/>
+
+
+        <TextView
+            android:id="@+id/eventInfoText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event details"
+            app:layout_column="1"
+            app:layout_row="1"
+            android:layout_marginBottom="20dp"/>
+
+    </androidx.gridlayout.widget.GridLayout>
+
+
 
 </RelativeLayout>

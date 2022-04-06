@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -60,12 +62,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     boolean displaySpouseLines;
     boolean displayLifeStoryLines;
     boolean displayFamilyTreeLines;
-
+    TextView eventInfoText;
+    TextView personInfoText;
 
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
+
+        eventInfoText = (TextView) getView().findViewById(R.id.eventInfoText);
+        personInfoText = (TextView) getView().findViewById(R.id.personInfoText);
 
         displayedLines = new ArrayList<>();
 
@@ -356,9 +362,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             assert currEvent != null;
             System.out.println("Clicked on marker of " + currEvent.getEventType() + "for " + currEvent.getPersonID());
             drawEnabledLines(currEvent, myMap, marker);
-            //pass the shared preferences to the thingy
-            // draw lines, center camera, and put info in infoBox
+
+            setInfoText(currEvent);
+
             return false;
+        }
+
+        private void setInfoText(Event currEvent) {
+            PersonBinaryTree personNode = personBinaryTree.findNodeFromID(currEvent.getPersonID(), personBinaryTree);
+            String firstName = personNode.getPerson().getFirstName();
+            String lastName = personNode.getPerson().getLastName();
+            String eventType = currEvent.getEventType();
+            String eventCity = currEvent.getCity();
+            String eventCountry = currEvent.getCountry();
+            String eventYear = Integer.toString(currEvent.getYear());
+
+            personInfoText.setText(firstName + " " + lastName);
+            eventInfoText.setText(eventType.toUpperCase() + ": " + eventCity + ", " + eventCountry + " (" + eventYear + ")");
         }
 
         private void drawEnabledLines(Event currEvent, GoogleMap myMap, Marker marker) {

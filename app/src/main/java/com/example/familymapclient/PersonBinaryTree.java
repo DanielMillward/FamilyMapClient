@@ -107,4 +107,19 @@ public class PersonBinaryTree {
         temp = getSubtreeGivenID(personID, tree.getRight());
         return temp;
     }
+
+    public PersonBinaryTree findNodeFromID(String personID, PersonBinaryTree tree) {
+        if (tree.getPerson().getPersonID().equals(personID)) {
+            return tree;
+        }
+        if (tree.left == null || tree.right == null) {
+            return null;
+        }
+        PersonBinaryTree temp = findNodeFromID(personID, tree.getLeft());
+        if (temp != null) {
+            return temp;
+        }
+        temp = findNodeFromID(personID, tree.getRight());
+        return temp;
+    }
 }
