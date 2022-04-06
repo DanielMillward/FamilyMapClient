@@ -88,4 +88,23 @@ public class PersonBinaryTree {
         if (momTree != null) return momTree;
         return null;
     }
+
+    public PersonBinaryTree getSubtreeGivenID(String personID, PersonBinaryTree tree) {
+        if (tree == null) return null;
+        if (tree.getPerson().getPersonID().equals(personID)) {
+            return tree;
+        }
+        if (tree.getLeft() != null && tree.getLeft().getPerson().getPersonID().equals(personID)) {
+            return tree.getLeft();
+        }
+        if (tree.getRight() != null && tree.getRight().getPerson().getPersonID().equals(personID)) {
+            return tree.getRight();
+        }
+        PersonBinaryTree temp = getSubtreeGivenID(personID, tree.getLeft());
+        if (temp != null) {
+            return temp;
+        }
+        temp = getSubtreeGivenID(personID, tree.getRight());
+        return temp;
+    }
 }

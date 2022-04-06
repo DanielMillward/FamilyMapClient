@@ -377,25 +377,64 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 drawSpouseLines(currPersonID, marker);
             }
             if (displayFamilyTreeLines) {
-                //drawFamilyTreeLines(currEvent);
+                drawFamilyTreeLines(currEvent, marker);
             }
             if (displayLifeStoryLines) {
                 drawLifeStoryLines(currEvent);
             }
         }
 
+        private void drawFamilyTreeLines(Event currEvent, Marker marker) {
+            PersonBinaryTree currPersonSubTree = personBinaryTree.getSubtreeGivenID(currEvent.getPersonID(), personBinaryTree);
+            recurseDrawFamilyTree(currEvent, currPersonSubTree, 20, marker);
+        }
+
+        private void recurseDrawFamilyTree(Event currEvent, PersonBinaryTree currPersonSubTree, float width, Marker currMarker) {
+            if (currPersonSubTree.left != null && currPersonSubTree.right != null) {
+                int oldestDadYear = 2022;
+                int oldestMomYear = 2022;
+                Marker oldestDadMarker = null;
+                Marker oldestMomMarker = null;
+                //find the oldest marker for the parents
+                for (Marker marker : displayedMarkers) {
+                    Event currMarkerEvent = (Event) marker.getTag();
+                    if (currMarkerEvent.getPersonID().equals(currPersonSubTree.getLeft().getPerson().getPersonID())) {
+                        //event is a dad event
+                        if (currMarkerEvent.getYear() < oldestDadYear) {
+                            oldestDadYear = currMarkerEvent.getYear();
+                            oldestDadMarker = marker;
+                        }
+                    }
+                    if (currMarkerEvent.getPersonID().equals(currPersonSubTree.getRight().getPerson().getPersonID())) {
+                        //event is a mom event
+                        if (currMarkerEvent.getYear() < oldestMomYear) {
+                            oldestMomYear = currMarkerEvent.getYear();
+                            oldestMomMarker = marker;
+                        }
+                    }
+                }
+                //draw lines to parents
+                drawLineGivenMarkers(myMap, currMarker, oldestDadMarker,0xff000000, width);
+                drawLineGivenMarkers(myMap, currMarker, oldestMomMarker,0xff000000, width);
+
+                //call same thing on parents
+                recurseDrawFamilyTree(currEvent, currPersonSubTree.getLeft(), width * (2/3f), oldestDadMarker);
+                recurseDrawFamilyTree(currEvent, currPersonSubTree.getRight(), width * (2/3f), oldestMomMarker);
+            }
+        }
+
         private void drawLifeStoryLines(Event currEvent) {
             ArrayList<Marker> personMarkers = new ArrayList<>();
-
+            //Find marker events relating to selected person
             for (Marker marker : displayedMarkers) {
                 Event markerEvent = (Event) marker.getTag();
                 if (markerEvent.getPersonID().equals(currEvent.getPersonID())) {
                     personMarkers.add(marker);
                 }
             }
-
+            //sort based on year
             Collections.sort(personMarkers, new EventComparator());
-            //Now have sorted markers based on year.
+            //Now have sorted markers based on year. Just draw the connecting event markers!
             for (int i = 0; i < personMarkers.size()-1; ++i) {
                 drawLineGivenMarkers(myMap, personMarkers.get(i), personMarkers.get(i+1),0xff0000ff, 10F );
             }
