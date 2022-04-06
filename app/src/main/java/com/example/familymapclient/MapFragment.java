@@ -28,6 +28,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -379,7 +380,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 //drawFamilyTreeLines(currEvent);
             }
             if (displayLifeStoryLines) {
-                //drawLifeStoryLines(currEvent);
+                drawLifeStoryLines(currEvent);
+            }
+        }
+
+        private void drawLifeStoryLines(Event currEvent) {
+            ArrayList<Marker> personMarkers = new ArrayList<>();
+
+            for (Marker marker : displayedMarkers) {
+                Event markerEvent = (Event) marker.getTag();
+                if (markerEvent.getPersonID().equals(currEvent.getPersonID())) {
+                    personMarkers.add(marker);
+                }
+            }
+
+            Collections.sort(personMarkers, new EventComparator());
+            //Now have sorted markers based on year.
+            for (int i = 0; i < personMarkers.size()-1; ++i) {
+                drawLineGivenMarkers(myMap, personMarkers.get(i), personMarkers.get(i+1),0xff0000ff, 10F );
             }
         }
 
@@ -406,19 +424,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                     }
                 }
 
-                drawLineGivenMarkers(myMap, currMarker, oldestMarker, markerColors[0], 10F);
+                drawLineGivenMarkers(myMap, currMarker, oldestMarker, 0xffff0000, 10F);
             }
 
 
         }
 
-        private void drawLineGivenMarkers(GoogleMap map, Marker currMarker, Marker oldestMarker, float color, float width) {
+        private void drawLineGivenMarkers(GoogleMap map, Marker currMarker, Marker oldestMarker, int color, float width) {
             //
             LatLng start = new LatLng(currMarker.getPosition().latitude, currMarker.getPosition().longitude);
             LatLng end = new LatLng(oldestMarker.getPosition().latitude, oldestMarker.getPosition().longitude);
             System.out.println("Drawing line between " + start.toString() + " and " + end.toString());
 
-            PolylineOptions options = new PolylineOptions().add(start).add(end).color(0xffff0000).width(width);
+            PolylineOptions options = new PolylineOptions().add(start).add(end).color(color).width(width);
             Polyline line = map.addPolyline(options);
             displayedLines.add(line);
         }
