@@ -2,6 +2,7 @@ package com.example.familymapclient;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -46,12 +49,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     PersonBinaryTree personBinaryTree;
     Map<String, Person> personMap;
     ArrayList<Marker> displayedMarkers;
+    ArrayList<Polyline> displayedLines;
+
+
+    boolean displayFatherSide;
+    boolean displayMotherSide;
+    boolean displayMale;
+    boolean displayFemale;
+    boolean displaySpouseLines;
+    boolean displayLifeStoryLines;
+    boolean displayFamilyTreeLines;
 
 
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
+
+        displayedLines = new ArrayList<>();
+
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", false);
+        displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", false);
+        displayMale = sharedPref.getBoolean("MALE_EVENTS", true);
+        displayFemale = sharedPref.getBoolean("FEMALE_EVENTS", true);
+        displaySpouseLines = sharedPref.getBoolean("SPOUSE_LINES", true);
+        displayLifeStoryLines = sharedPref.getBoolean("LIFE_STORY_LINES", true);
+        displayFamilyTreeLines = sharedPref.getBoolean("FAMILY_TREE_LINES", true);
 
         personMap = new HashMap<>();
         displayedMarkers = new ArrayList<>();
@@ -177,22 +201,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         map.animateCamera(CameraUpdateFactory.newLatLng(sydney));
         System.out.println("About to add stuff to map!");
         addEventsToMap(map);
-        map.setOnMarkerClickListener(new MyMarkerListener());
+        map.setOnMarkerClickListener(new MyMarkerListener(googleMap));
     }
 
     private void addEventsToMap(GoogleMap map) {
         //Use data to put all events there
         //use setTag to pass in the event object
-        LatLng sydney= new LatLng(-34,  151);
-        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        //LatLng sydney= new LatLng(-34,  151);
+        //map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 
 
 
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", false);
-        boolean displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", false);
-        boolean displayMale = sharedPref.getBoolean("MALE_EVENTS", true);
-        boolean displayFemale = sharedPref.getBoolean("FEMALE_EVENTS", true);
+
 
         //TODO: Based on these bools and the tree previously made, decide which ones are displayed
         System.out.println("About to delete some nodes");
@@ -264,6 +284,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private void setPersonTreeNodesFalse(String nodeType, PersonBinaryTree tree) {
         //goes through tree and deletes the respective nodes based on the settings
         if (tree == null) return;
+        //To do: might be able to combine father/mother since code is basically the same and starts are different
+        //goes through and sets every child to false
         if (nodeType.equals("father")) {
             tree.setDisplayed(false);
             if (tree.left != null && tree.right != null) {
@@ -282,6 +304,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 setPersonTreeNodesFalse("mother", tree.getLeft());
                 setPersonTreeNodesFalse("mother", tree.getRight());
             }
+        //goes through and sets every male child to false
         } else if (nodeType.equals("male")) {
             if (tree.getPerson().getGender().equals("m")) {
                 tree.setDisplayed(false);
@@ -319,13 +342,88 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
 
     private class MyMarkerListener implements GoogleMap.OnMarkerClickListener {
-
+        GoogleMap myMap;
+        public MyMarkerListener(@NonNull GoogleMap googleMap) {
+            myMap = googleMap;
+        }
 
         @Override
         public boolean onMarkerClick(@NonNull Marker marker) {
-            //use the tag of the marker to tell what event object it was
+            //use the tag of the marker to tell what event object it was, use displayedMarkers
+            Event currEvent = (Event) marker.getTag();
+            myMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+            assert currEvent != null;
+            System.out.println("Clicked on marker of " + currEvent.getEventType() + "for " + currEvent.getPersonID());
+            drawEnabledLines(currEvent, myMap, marker);
             //pass the shared preferences to the thingy
+            // draw lines, center camera, and put info in infoBox
             return false;
         }
+
+        private void drawEnabledLines(Event currEvent, GoogleMap myMap, Marker marker) {
+            //clear previously displayed lines
+            if (displayedLines != null) {
+                for (Polyline line: displayedLines) {
+                    line.remove();
+                }
+            }
+
+
+            String currPersonID = currEvent.getPersonID();
+
+            if (displaySpouseLines) {
+                System.out.println("Printing spouse lines");
+                drawSpouseLines(currPersonID, marker);
+            }
+            if (displayFamilyTreeLines) {
+                //drawFamilyTreeLines(currEvent);
+            }
+            if (displayLifeStoryLines) {
+                //drawLifeStoryLines(currEvent);
+            }
+        }
+
+        private void drawSpouseLines(String currPersonID, Marker currMarker) {
+            PersonBinaryTree currTree= personBinaryTree.findSpouseOfPersonFromID(personBinaryTree, currPersonID);
+            Person currPersonSpouse = null;
+            if (currTree != null) {
+                currPersonSpouse = currTree.getPerson();
+                System.out.println("Spouse of " + currPersonID+ " is " + currPersonSpouse.getPersonID());
+            }
+
+            int oldestYear = 2022;
+            Marker oldestMarker = null;
+            if (currPersonSpouse != null) {
+                for (Marker marker : displayedMarkers) {
+                    //Iterate through all markers, if it belongs to spouse, and is oldest, set as marker
+                    Event markerEvent = (Event) marker.getTag();
+                    System.out.println("Comparing " + markerEvent.getPersonID() + " with " + currPersonSpouse.getPersonID());
+                    if (markerEvent.getPersonID().equals(currPersonSpouse.getPersonID())) {
+                        if (markerEvent.getYear()  < oldestYear) {
+                            oldestYear = markerEvent.getYear();
+                            oldestMarker = marker;
+                        }
+                    }
+                }
+
+                drawLineGivenMarkers(myMap, currMarker, oldestMarker, markerColors[0], 10F);
+            }
+
+
+        }
+
+        private void drawLineGivenMarkers(GoogleMap map, Marker currMarker, Marker oldestMarker, float color, float width) {
+            //
+            LatLng start = new LatLng(currMarker.getPosition().latitude, currMarker.getPosition().longitude);
+            LatLng end = new LatLng(oldestMarker.getPosition().latitude, oldestMarker.getPosition().longitude);
+            System.out.println("Drawing line between " + start.toString() + " and " + end.toString());
+
+            PolylineOptions options = new PolylineOptions().add(start).add(end).color(0xffff0000).width(width);
+            Polyline line = map.addPolyline(options);
+            displayedLines.add(line);
+        }
     }
+
+
+
 }

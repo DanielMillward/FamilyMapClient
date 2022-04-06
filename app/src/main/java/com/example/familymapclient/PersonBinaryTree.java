@@ -13,6 +13,8 @@ public class PersonBinaryTree {
         this.isDisplayed = isDisplayed;
     }
 
+
+
     public PersonBinaryTree getLeft() {
         return left;
     }
@@ -45,5 +47,45 @@ public class PersonBinaryTree {
 
     public void setDisplayed(boolean displayed) {
         isDisplayed = displayed;
+    }
+
+    public PersonBinaryTree findSpouseOfPersonFromID(PersonBinaryTree tree, String currPersonID) {
+        //assumes we are in the root
+        if (tree == null || tree.getPerson().getPersonID().equals(currPersonID)) {
+            return null;
+        }
+        if (tree.getLeft() != null && tree.getLeft().getPerson().getPersonID().equals(currPersonID)) {
+            System.out.println("Found spouse! " + tree.getRight().getPerson().getPersonID());
+            return tree.getRight();
+        }
+        if (tree.getRight() != null && tree.getRight().getPerson().getPersonID().equals(currPersonID)) {
+            System.out.println("Found spouse! " + tree.getLeft().getPerson().getPersonID());
+            return tree.getLeft();
+        }
+        PersonBinaryTree temp = findSpouseOfPersonFromID(tree.getLeft(), currPersonID);
+        if (temp != null) {
+            return temp;
+        }
+        temp = findSpouseOfPersonFromID(tree.getRight(), currPersonID);
+        return temp;
+
+    }
+
+    private PersonBinaryTree findChildFromParentID(String currPersonID) {
+        if (left == null || right == null) {
+            return null;
+        }
+        if (left.getPerson().getPersonID().equals(currPersonID)) {
+            return this;
+        }
+        if (right.getPerson().getPersonID().equals(currPersonID)) {
+            return this;
+        }
+
+        PersonBinaryTree dadTree = left.findChildFromParentID(currPersonID);
+        PersonBinaryTree momTree = right.findChildFromParentID(currPersonID);
+        if (dadTree != null) return dadTree;
+        if (momTree != null) return momTree;
+        return null;
     }
 }
