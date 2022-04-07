@@ -291,7 +291,11 @@
                 android:layout_height="wrap_content"
                 app:columnCount="2"
                 app:rowCount="9"
-                android:paddingTop="10dp">
+                android:paddingTop="10dp"
+                android:id="@+id/logoutView"
+                android:onClick="logoutUser"
+                android:clickable="true"
+                >
 
                 <TextView
                     android:layout_width="wrap_content"

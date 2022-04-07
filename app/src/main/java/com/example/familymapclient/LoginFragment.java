@@ -148,7 +148,7 @@ public class LoginFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-        loginButton.setEnabled(false);
+        //loginButton.setEnabled(false);
         registerButton.setEnabled(false);
 
         host.addTextChangedListener(textWatcher);

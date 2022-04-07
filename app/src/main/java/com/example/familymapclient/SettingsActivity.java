@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.GridLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,8 @@ public class SettingsActivity extends AppCompatActivity {
     SwitchCompat motherSwitch;
     SwitchCompat maleSwitch;
     SwitchCompat femaleSwitch;
+
+    androidx.gridlayout.widget.GridLayout logoutView;
 
     boolean displayFatherSide;
     boolean displayMotherSide;
@@ -48,6 +51,8 @@ public class SettingsActivity extends AppCompatActivity {
         motherSwitch = (SwitchCompat) findViewById(R.id.motherSideSwitch);
         maleSwitch = (SwitchCompat) findViewById(R.id.maleSwitch);
         femaleSwitch = (SwitchCompat) findViewById(R.id.femaleSwitch);
+
+        logoutView = (androidx.gridlayout.widget.GridLayout) findViewById(R.id.logoutView);
 
         SharedPreferences sharedPref = getSharedPreferences("settings", Context.MODE_PRIVATE);
         displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", false);
@@ -73,8 +78,16 @@ public class SettingsActivity extends AppCompatActivity {
         motherSwitch.setOnCheckedChangeListener(new SwitchListener("MOTHERS_SIDE"));
         maleSwitch.setOnCheckedChangeListener(new SwitchListener("MALE_EVENTS"));
         femaleSwitch.setOnCheckedChangeListener(new SwitchListener("FEMALE_EVENTS"));
+
+
     }
 
+    public void logoutUser(View view){
+        Intent myIntent = new Intent(this, MainActivity.class);
+        myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(myIntent);
+        finish();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
