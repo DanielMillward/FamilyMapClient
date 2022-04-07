@@ -10,6 +10,7 @@ public class FullUser implements Serializable, Parcelable {
     String userLastName;
     UserDataModel userData;
 
+
     public FullUser(String userFirstName, String userLastName, UserDataModel userData) {
         this.userFirstName = userFirstName;
         this.userLastName = userLastName;

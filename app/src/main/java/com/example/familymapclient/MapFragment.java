@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -231,6 +232,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 Intent intent = new Intent(getActivity().getApplicationContext(), SettingsActivity.class);
                 settingsActivityLauncher.launch(intent);
                 return true;
+            case R.id.search_icon:
+                Intent searchIntent = new Intent(getActivity().getApplicationContext(), SearchActivity.class);
+                Bundle myBundle = new Bundle();
+                myBundle.putString("key", "value");
+                myBundle.putSerializable("personMap", (Serializable) personMap);
+
+                searchIntent.putExtras(myBundle);
+                settingsActivityLauncher.launch(searchIntent);
+                return true;
         }
 
         return super.onOptionsItemSelected(item); // important line
@@ -242,21 +252,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    System.out.println("OK1!!!! " + result.getResultCode());
-                    //delete displayedMarkers
-                    System.out.println("OK!!!!");
-                    for (Marker marker : displayedMarkers) {
-                        marker.remove();
-                    }
-                    //delete displayedLines
-                    for (Polyline line : displayedLines) {
-                        line.remove();
-                    }
-                    //redraw
-                    getStoredPreferences();
-                    addEventsToMap(map);
+                    resetMap(result);
                 }
             });
+
+    ActivityResultLauncher<Intent> searchActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    //resetMap(result);
+                }
+            });
+
+    private void resetMap(ActivityResult result) {
+        System.out.println("OK1!!!! " + result.getResultCode());
+        //delete displayedMarkers
+        System.out.println("OK!!!!");
+        for (Marker marker : displayedMarkers) {
+            marker.remove();
+        }
+        //delete displayedLines
+        for (Polyline line : displayedLines) {
+            line.remove();
+        }
+        //redraw
+        getStoredPreferences();
+        addEventsToMap(map);
+    }
 
     public void openSettings() {
         //The one you actually plug & play where you need

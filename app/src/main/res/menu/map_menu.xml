@@ -3,10 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/app_bar_search"
+        android:id="@+id/search_icon"
         android:icon="@android:drawable/btn_star_big_on"
         android:title="Search"
-        app:actionViewClass="android.widget.SearchView"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/settings_icon"
