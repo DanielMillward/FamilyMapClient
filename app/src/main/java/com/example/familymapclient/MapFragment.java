@@ -497,6 +497,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 //find the oldest marker for the parents
                 for (Marker marker : displayedMarkers) {
                     Event currMarkerEvent = (Event) marker.getTag();
+                    if (currMarkerEvent == null) continue;
                     if (currMarkerEvent.getPersonID().equals(currPersonSubTree.getLeft().getPerson().getPersonID())) {
                         //event is a dad event
                         if (currMarkerEvent.getYear() < oldestDadYear) {
@@ -572,7 +573,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 if (currMarker != null && oldestMarker != null) {
                     drawLineGivenMarkers(myMap, currMarker, oldestMarker, 0xffff0000, 10F);
                 }
-                
+
             }
 
 
@@ -581,10 +582,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         private void drawLineGivenMarkers(GoogleMap map, Marker currMarker, Marker oldestMarker, int color, float width) {
             if (currMarker == null) {
                 System.out.println("Uh oh");
+                return;
             }
             LatLng start = new LatLng(currMarker.getPosition().latitude, currMarker.getPosition().longitude);
             if (oldestMarker == null) {
                 System.out.println("huh");
+                return;
             }
             LatLng end = new LatLng(oldestMarker.getPosition().latitude, oldestMarker.getPosition().longitude);
             System.out.println("Drawing line between " + start.toString() + " and " + end.toString());
