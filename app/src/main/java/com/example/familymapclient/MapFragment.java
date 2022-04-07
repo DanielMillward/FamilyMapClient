@@ -36,6 +36,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -237,7 +238,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 Bundle myBundle = new Bundle();
                 myBundle.putString("key", "value");
                 myBundle.putSerializable("personMap", (Serializable) personMap);
-
+                ArrayList<Event> displayedEvents = new ArrayList<>();
+                for (Marker marker : displayedMarkers) {
+                    Event currEvent = (Event) marker.getTag();
+                    displayedEvents.add(currEvent);
+                }
+                myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
                 searchIntent.putExtras(myBundle);
                 settingsActivityLauncher.launch(searchIntent);
                 return true;

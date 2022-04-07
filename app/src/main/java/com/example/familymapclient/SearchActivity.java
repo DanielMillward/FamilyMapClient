@@ -5,9 +5,13 @@ import android.widget.SearchView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.model.Marker;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 import Models.AuthToken;
+import Models.Event;
 import Models.Person;
 
 public class SearchActivity extends AppCompatActivity {
@@ -16,6 +20,7 @@ public class SearchActivity extends AppCompatActivity {
     FullUser userInfo;
     UserDataModel userData;
     Map<String, Person> personMap;
+    ArrayList<Event> displayedEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +29,7 @@ public class SearchActivity extends AppCompatActivity {
 
         searchView = (SearchView) findViewById(R.id.searchBar);
         personMap = (Map<String, Person>) getIntent().getExtras().getSerializable("personMap");
+        displayedEvents = (ArrayList<Event>) getIntent().getExtras().getSerializable("displayedEvents");
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
