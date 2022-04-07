@@ -9,7 +9,8 @@
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="ifRoom" />
     <item
-        android:icon="@android:drawable/ic_lock_idle_alarm"
+        android:id="@+id/settings_icon"
+        android:icon="@android:drawable/ic_menu_info_details"
         android:title="Item"
         app:showAsAction="ifRoom" />
 </menu>

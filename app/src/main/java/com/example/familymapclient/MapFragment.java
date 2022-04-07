@@ -1,13 +1,20 @@
 package com.example.familymapclient;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -63,7 +70,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     TextView eventInfoText;
     TextView personInfoText;
 
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
 
+    // TODO: Rename and change types of parameters
+    private String mParam1;
+    private String mParam2;
 
 
     @Override
@@ -83,6 +97,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         displaySpouseLines = sharedPref.getBoolean("SPOUSE_LINES", true);
         displayLifeStoryLines = sharedPref.getBoolean("LIFE_STORY_LINES", true);
         displayFamilyTreeLines = sharedPref.getBoolean("FAMILY_TREE_LINES", true);
+
 
         personMap = new HashMap<>();
         displayedMarkers = new ArrayList<>();
@@ -150,16 +165,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     public MapFragment() {
         // Required empty public constructor
         setHasOptionsMenu(true);
@@ -203,21 +208,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //saying we're using the map_menu xml file for our options menu
         inflater.inflate(R.menu.map_menu, menu);
         super.onCreateOptionsMenu(menu,inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //use for menu items
         int id = item.getItemId();
         switch (id) {
             //case R.id.action_settings:
                 // do stuff, like showing settings fragment
            //     return true;
+            case R.id.settings_icon:
+                Intent intent = new Intent(getActivity().getApplicationContext(), SettingsActivity.class);
+                settingsActivityLauncher.launch(intent);
+                return true;
         }
 
         return super.onOptionsItemSelected(item); // important line
     }
+
+    // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+    ActivityResultLauncher<Intent> settingsActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        //If do below data, doesn't work...
+                        //Intent data = result.getData();
+                        //do something now that the settings is done, maybe refresh map?
+                    }
+                }
+            });
+
+    public void openSettings() {
+        //The one you actually plug & play where you need
+
+    }
+
 
     //The one that actually does the work!
     @Override

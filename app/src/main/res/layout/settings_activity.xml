@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settings"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Life Story Lines"
+                    android:textSize="20dp"
+                    app:layout_gravity="center_vertical"
+                    app:layout_rowWeight="2"
+                    app:layout_column="0"
+                    app:layout_row="0"
+                    android:layout_marginLeft="20dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show life story lines"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/lifeLineSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Family Tree Lines"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Show family tree lines"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/treeLineSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Spouse Lines"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Show spouse lines"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/spouseLineSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Father's side"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Filter by father's side of family"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/fatherSideSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Mother's side"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Filter by mother's side of family"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/motherSideSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Male Events"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Filter Events based on gender"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/maleSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Female Events"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Filter events based on gender"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/femaleSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_column="1"
+                    app:layout_row="0"
+                    app:layout_gravity="right"
+                    app:layout_rowSpan="2"/>
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="9"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Logout"
+                    android:textSize="20dp"
+                    app:layout_column="0"
+                    app:layout_gravity="center_vertical"
+                    app:layout_row="0"
+                    app:layout_rowWeight="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Return to login screen"
+                    android:textAllCaps="true"
+                    app:layout_column="0"
+                    app:layout_row="1" />
+
+                <View style="@style/Separator" app:layout_row="2" app:layout_columnSpan="2"/>
+            </androidx.gridlayout.widget.GridLayout>
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>
