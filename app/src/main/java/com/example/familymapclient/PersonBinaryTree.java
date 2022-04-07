@@ -1,8 +1,11 @@
 package com.example.familymapclient;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 import Models.Person;
 
-public class PersonBinaryTree {
+public class PersonBinaryTree implements Serializable {
     PersonBinaryTree left;
     PersonBinaryTree right;
     Person person;
@@ -121,5 +124,18 @@ public class PersonBinaryTree {
         }
         temp = findNodeFromID(personID, tree.getRight());
         return temp;
+    }
+
+    public ArrayList<Person> getAllDisplayed(PersonBinaryTree personTree, ArrayList<Person> output) {
+        if (personTree != null && personTree.isDisplayed()) {
+            output.add(personTree.getPerson());
+        }
+        if (personTree.left != null) {
+            getAllDisplayed(personTree.getLeft(), output);
+        }
+        if (personTree.right != null) {
+            getAllDisplayed(personTree.getLeft(), output);
+        }
+        return output;
     }
 }

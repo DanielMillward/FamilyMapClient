@@ -237,7 +237,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 Intent searchIntent = new Intent(getActivity().getApplicationContext(), SearchActivity.class);
                 Bundle myBundle = new Bundle();
                 myBundle.putString("key", "value");
-                myBundle.putSerializable("personMap", (Serializable) personMap);
+                myBundle.putSerializable("personTree", (Serializable) personBinaryTree);
                 ArrayList<Event> displayedEvents = new ArrayList<>();
                 for (Marker marker : displayedMarkers) {
                     Event currEvent = (Event) marker.getTag();

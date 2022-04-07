@@ -71,8 +71,10 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
 
         if (cardData.getGender().equals("m")) {
             viewHolder.personPicture.setBackgroundResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
-        } else {
+        } else if (cardData.getGender().equals("f")){
             viewHolder.personPicture.setBackgroundResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+        } else {
+            viewHolder.personPicture.setBackgroundResource(com.google.android.material.R.drawable.abc_btn_radio_to_on_mtrl_015);
         }
     }
 
