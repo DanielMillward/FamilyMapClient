@@ -305,16 +305,16 @@ public class LoginFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void setDefaultPreferences() {
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("LIFE_STORY_LINES", false);
+        editor.putBoolean("LIFE_STORY_LINES", true);
         editor.putBoolean("FAMILY_TREE_LINES", true);
         editor.putBoolean("SPOUSE_LINES", true);
         editor.putBoolean("FATHERS_SIDE", true);
         editor.putBoolean("MOTHERS_SIDE", true);
         editor.putBoolean("MALE_EVENTS", true);
         editor.putBoolean("FEMALE_EVENTS", true);
-        editor.apply();
+        editor.commit();
     }
 
 

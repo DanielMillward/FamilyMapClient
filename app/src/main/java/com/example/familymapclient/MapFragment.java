@@ -58,7 +58,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     Map<String, Person> personMap;
     ArrayList<Marker> displayedMarkers;
     ArrayList<Polyline> displayedLines;
-
+    private GoogleMap map;
 
     boolean displayFatherSide;
     boolean displayMotherSide;
@@ -84,19 +84,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // here you have the reference of your button
 
+
+
         eventInfoText = (TextView) getView().findViewById(R.id.eventInfoText);
         personInfoText = (TextView) getView().findViewById(R.id.personInfoText);
 
         displayedLines = new ArrayList<>();
 
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", false);
-        displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", false);
-        displayMale = sharedPref.getBoolean("MALE_EVENTS", true);
-        displayFemale = sharedPref.getBoolean("FEMALE_EVENTS", true);
-        displaySpouseLines = sharedPref.getBoolean("SPOUSE_LINES", true);
-        displayLifeStoryLines = sharedPref.getBoolean("LIFE_STORY_LINES", true);
-        displayFamilyTreeLines = sharedPref.getBoolean("FAMILY_TREE_LINES", true);
+        getStoredPreferences();
 
 
         personMap = new HashMap<>();
@@ -129,6 +124,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         mapFragment.getMapAsync(this);
 
         fillPersonBinaryTree(userData.getPersons(), userInfo.getUserFirstName(), userInfo.getUserLastName());
+    }
+
+    private void getStoredPreferences() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+        displayFatherSide = sharedPref.getBoolean("FATHERS_SIDE", true);
+        displayMotherSide = sharedPref.getBoolean("MOTHERS_SIDE", false);
+        displayMale = sharedPref.getBoolean("MALE_EVENTS", true);
+        displayFemale = sharedPref.getBoolean("FEMALE_EVENTS", true);
+        displaySpouseLines = sharedPref.getBoolean("SPOUSE_LINES", true);
+        displayLifeStoryLines = sharedPref.getBoolean("LIFE_STORY_LINES", true);
+        displayFamilyTreeLines = sharedPref.getBoolean("FAMILY_TREE_LINES", true);
     }
 
     private void fillPersonBinaryTree(ArrayList<Person> persons, String firstName, String lastName) {
@@ -236,11 +242,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        //If do below data, doesn't work...
-                        //Intent data = result.getData();
-                        //do something now that the settings is done, maybe refresh map?
+                    System.out.println("OK1!!!! " + result.getResultCode());
+                    //delete displayedMarkers
+                    System.out.println("OK!!!!");
+                    for (Marker marker : displayedMarkers) {
+                        marker.remove();
                     }
+                    //delete displayedLines
+                    for (Polyline line : displayedLines) {
+                        line.remove();
+                    }
+                    //redraw
+                    getStoredPreferences();
+                    addEventsToMap(map);
                 }
             });
 
@@ -253,7 +267,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     //The one that actually does the work!
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        GoogleMap map = googleMap;
+        map = googleMap;
         // Add a marker in Sydney and move the camera
         LatLng sydney= new LatLng(-34,  151);
 
@@ -275,6 +289,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         //TODO: Based on these bools and the tree previously made, decide which ones are displayed
         System.out.println("About to delete some nodes");
+        resetTreeDisplay(personBinaryTree);
+        displayedMarkers.clear();
+        displayedLines.clear();
         if (!displayFatherSide) {
             //set the isDisplayed of the person node to false
             setPersonTreeNodesFalse("father", personBinaryTree.getLeft());
@@ -319,6 +336,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 displayedMarkers.add(marker);
                 colorCounter++;
             }
+        }
+    }
+
+    private void resetTreeDisplay(PersonBinaryTree tree) {
+        tree.setDisplayed(true);
+        if (tree.left != null) {
+            resetTreeDisplay(tree.getLeft());
+        }
+        if (tree.right != null) {
+            resetTreeDisplay(tree.getRight());
         }
     }
 
@@ -485,9 +512,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                         }
                     }
                 }
+                if (oldestDadMarker != null) {
+                    drawLineGivenMarkers(myMap, currMarker, oldestDadMarker,0xff000000, width);
+                }
                 //draw lines to parents
-                drawLineGivenMarkers(myMap, currMarker, oldestDadMarker,0xff000000, width);
-                drawLineGivenMarkers(myMap, currMarker, oldestMomMarker,0xff000000, width);
+                if (oldestMomMarker != null) {
+                    drawLineGivenMarkers(myMap, currMarker, oldestMomMarker,0xff000000, width);
+                }
+
 
                 //call same thing on parents
                 recurseDrawFamilyTree(currEvent, currPersonSubTree.getLeft(), width * (2/3f), oldestDadMarker);
@@ -515,8 +547,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         private void drawSpouseLines(String currPersonID, Marker currMarker) {
             PersonBinaryTree currTree= personBinaryTree.findSpouseOfPersonFromID(personBinaryTree, currPersonID);
             Person currPersonSpouse = null;
-            if (currTree != null) {
+            if (currTree == null) {
+                return;
+            } else {
                 currPersonSpouse = currTree.getPerson();
+
                 System.out.println("Spouse of " + currPersonID+ " is " + currPersonSpouse.getPersonID());
             }
 
@@ -534,16 +569,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                         }
                     }
                 }
-
-                drawLineGivenMarkers(myMap, currMarker, oldestMarker, 0xffff0000, 10F);
+                if (currMarker != null && oldestMarker != null) {
+                    drawLineGivenMarkers(myMap, currMarker, oldestMarker, 0xffff0000, 10F);
+                }
+                
             }
 
 
         }
 
         private void drawLineGivenMarkers(GoogleMap map, Marker currMarker, Marker oldestMarker, int color, float width) {
-            //
+            if (currMarker == null) {
+                System.out.println("Uh oh");
+            }
             LatLng start = new LatLng(currMarker.getPosition().latitude, currMarker.getPosition().longitude);
+            if (oldestMarker == null) {
+                System.out.println("huh");
+            }
             LatLng end = new LatLng(oldestMarker.getPosition().latitude, oldestMarker.getPosition().longitude);
             System.out.println("Drawing line between " + start.toString() + " and " + end.toString());
 
