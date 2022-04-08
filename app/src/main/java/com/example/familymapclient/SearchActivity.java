@@ -87,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
             // checking if the entered string matched with any item of our recycler view.
             if (person.getFirstName().toLowerCase().contains(s.toLowerCase()) || person.getLastName().toLowerCase().contains(s.toLowerCase())) {
                 // got a match, add it to the thing
-                newList.add(new PersonCard(person.getFirstName(), person.getLastName(), "", person.getGender()));
+                newList.add(new PersonCard(person.getFirstName(), person.getLastName(), "", person.getGender(), person));
             }
         }
         //now add the events
@@ -106,7 +106,7 @@ public class SearchActivity extends AppCompatActivity {
                         eventPseudoTitle = person.getFirstName() + " " + person.getLastName();
                     }
                 }
-                newList.add(new PersonCard(eventPseudoName, eventPseudoLastName, eventPseudoTitle, "e"));
+                newList.add(new PersonCard(eventPseudoName, eventPseudoLastName, eventPseudoTitle, "e", event));
             }
         }
         adapter.updateList(newList);

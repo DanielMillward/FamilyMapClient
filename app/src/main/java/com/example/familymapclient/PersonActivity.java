@@ -60,7 +60,7 @@ public class PersonActivity extends AppCompatActivity {
         userInfo= (FullUser) getIntent().getExtras().getSerializable("userData");
         userData = userInfo.getUserData();
         displayedPersons = new ArrayList<>();
-        displayedPersons = personTree.getAll(personTree);
+        displayedPersons = personTree.getAllDisplayed(personTree);
 
         firstName = (TextView) findViewById(R.id.personFirstName);
         lastName = (TextView) findViewById(R.id.personLastName);
@@ -108,7 +108,7 @@ public class PersonActivity extends AppCompatActivity {
                         Person clickedPerson = sortedDisplayedPersons.get(i1);
                         Event clickedEvent = null;
                         //get an event to pass on
-                        for (Event event : displayedEvents) {
+                        for (Event event : userData.getEvents()) {
                             if (event.getPersonID().equals(clickedPerson.getPersonID())) {
                                 clickedEvent = event;
                             }
@@ -149,7 +149,7 @@ public class PersonActivity extends AppCompatActivity {
 
     private void setTopInfo() {
         Person activePerson = null;
-        for (Person person : displayedPersons) {
+        for (Person person : userData.getPersons()) {
             if (person.getPersonID().equals(activeEvent.getPersonID())) {
                 activePerson = person;
             }
@@ -171,7 +171,7 @@ public class PersonActivity extends AppCompatActivity {
         ArrayList<PersonCard> personCards = new ArrayList<>();
         //Finding the person on the tree
         Person activePerson = null;
-        for (Person person : displayedPersons) {
+        for (Person person : userData.getPersons()) {
             if (person.getPersonID().equals(activeEvent.getPersonID())) {
                 activePerson = person;
             }
@@ -184,7 +184,7 @@ public class PersonActivity extends AppCompatActivity {
                             event.getCity() + ", " + event.getCountry();
                     String eventPseudoLastName = " (" + Integer.toString(event.getYear()) + ")";
                     String eventPseudoTitle = activePerson.getFirstName() + " " + activePerson.getLastName();
-                    eventCards.add(new PersonCard(eventPseudoName, eventPseudoLastName, eventPseudoTitle, "e"));
+                    eventCards.add(new PersonCard(eventPseudoName, eventPseudoLastName, eventPseudoTitle, "e", event));
                     tempEvents.add(event);
                 }
             }
@@ -224,19 +224,19 @@ public class PersonActivity extends AppCompatActivity {
             PersonBinaryTree childTree = activeTree.findChildFromParentID(activePerson.getPersonID(), personTree);
 
             if (fatherTree != null) {
-                personCards.add(new PersonCard(fatherTree.getPerson().getFirstName(), fatherTree.getPerson().getLastName(), "father", "m"));
+                personCards.add(new PersonCard(fatherTree.getPerson().getFirstName(), fatherTree.getPerson().getLastName(), "father", "m", fatherTree.getPerson()));
                 tempPersons.add(fatherTree.getPerson());
             }
             if (motherTree != null) {
-                personCards.add(new PersonCard(motherTree.getPerson().getFirstName(), motherTree.getPerson().getLastName(), "mother", "f"));
+                personCards.add(new PersonCard(motherTree.getPerson().getFirstName(), motherTree.getPerson().getLastName(), "mother", "f", motherTree.getPerson()));
                 tempPersons.add(motherTree.getPerson());
             }
             if (spouseTree != null) {
-                personCards.add(new PersonCard(spouseTree.getPerson().getFirstName(), spouseTree.getPerson().getLastName(), "spouse", spouseTree.getPerson().getGender()));
+                personCards.add(new PersonCard(spouseTree.getPerson().getFirstName(), spouseTree.getPerson().getLastName(), "spouse", spouseTree.getPerson().getGender(), spouseTree.getPerson()));
                 tempPersons.add(spouseTree.getPerson());
             }
             if (childTree != null) {
-                personCards.add(new PersonCard(childTree.getPerson().getFirstName(), childTree.getPerson().getLastName(), "child", childTree.getPerson().getGender()));
+                personCards.add(new PersonCard(childTree.getPerson().getFirstName(), childTree.getPerson().getLastName(), "child", childTree.getPerson().getGender(),childTree.getPerson()));
                 tempPersons.add(childTree.getPerson());
             }
         }

@@ -115,9 +115,9 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
         if(rowIndex==position){
             //got selected! Now to switch to the respective Person or Event activity
             boolean wasEventCard;
-            if (cardData.getFirstName().contains("(")) {
+            if (cardData.event != null) {
                 //it was an event
-                Event pastClickedEvent = getEventFromPersonCard(cardData);
+                Event pastClickedEvent = cardData.event;
                 //it was an actual event
                 Bundle myBundle = new Bundle();
                 Intent eventIntent = new Intent(context, EventActivity.class);
@@ -130,7 +130,7 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
                 cardActivityLauncher.launch(eventIntent);
             } else {
                 //it was a person
-                Person pastClickedPerson = getPersonFromPersonCard(cardData);
+                Person pastClickedPerson = cardData.person;
                 //clicked on a person, assume makeMap func is already called
                 Bundle myBundle = new Bundle();
                 //add people with whether they're displayed or not
@@ -152,9 +152,6 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
         }
     }
 
-    private Event getEventFromPersonCard(PersonCard cardData) {
-
-    }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
