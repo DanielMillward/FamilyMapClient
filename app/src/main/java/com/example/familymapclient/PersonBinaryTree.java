@@ -74,22 +74,21 @@ public class PersonBinaryTree implements Serializable {
 
     }
 
-    private PersonBinaryTree findChildFromParentID(String currPersonID) {
-        if (left == null || right == null) {
+    public PersonBinaryTree findChildFromParentID(String currPersonID, PersonBinaryTree tree) {
+        if (tree == null || tree.left == null || tree.right == null) {
             return null;
         }
-        if (left.getPerson().getPersonID().equals(currPersonID)) {
-            return this;
+        if (tree.getLeft().getPerson().getPersonID().equals(currPersonID)) {
+            return tree;
         }
-        if (right.getPerson().getPersonID().equals(currPersonID)) {
-            return this;
+        if (tree.getRight().getPerson().getPersonID().equals(currPersonID)) {
+            return tree;
         }
 
-        PersonBinaryTree dadTree = left.findChildFromParentID(currPersonID);
-        PersonBinaryTree momTree = right.findChildFromParentID(currPersonID);
+        PersonBinaryTree dadTree = tree.getLeft().findChildFromParentID(currPersonID, tree.getLeft());
+        PersonBinaryTree momTree = tree.getRight().findChildFromParentID(currPersonID, tree.getRight());
         if (dadTree != null) return dadTree;
-        if (momTree != null) return momTree;
-        return null;
+        return momTree;
     }
 
     public PersonBinaryTree getSubtreeGivenID(String personID, PersonBinaryTree tree) {
@@ -128,6 +127,25 @@ public class PersonBinaryTree implements Serializable {
 
     public ArrayList<Person> getAllDisplayed(PersonBinaryTree personTree) {
         ArrayList<Person> output = new ArrayList<>();
+        getAllDisplayedRecursive(this, output);
+        return output;
+    }
+
+    private void getAllDisplayedRecursive(PersonBinaryTree tree, ArrayList<Person> output) {
+        if (tree == null || tree.getPerson() == null) {
+            return;
+        } else {
+            getAllDisplayedRecursive(tree.left, output);
+            if (tree.isDisplayed()) {
+                output.add(tree.getPerson());
+            }
+            getAllDisplayedRecursive(tree.right, output);
+        }
+    }
+
+
+    public ArrayList<Person> getAll(PersonBinaryTree personTree) {
+        ArrayList<Person> output = new ArrayList<>();
         getAllRecursive(this, output);
         return output;
     }
@@ -137,12 +155,8 @@ public class PersonBinaryTree implements Serializable {
             return;
         } else {
             getAllRecursive(tree.left, output);
-            if (tree.isDisplayed()) {
-                output.add(tree.getPerson());
-            }
+            output.add(tree.getPerson());
             getAllRecursive(tree.right, output);
         }
     }
-
-
 }

@@ -72,6 +72,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     TextView eventInfoText;
     TextView personInfoText;
 
+    Event activeEvent;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -87,6 +89,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         // here you have the reference of your button
 
 
+        activeEvent = null;
 
         eventInfoText = (TextView) getView().findViewById(R.id.eventInfoText);
         personInfoText = (TextView) getView().findViewById(R.id.personInfoText);
@@ -126,7 +129,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         mapFragment.getMapAsync(this);
 
         fillPersonBinaryTree(userData.getPersons(), userInfo.getUserFirstName(), userInfo.getUserLastName());
+
+        //set onclick listener for bottom view thing
+        androidx.gridlayout.widget.GridLayout explainBox = getView().findViewById(R.id.eventInfo);
+
+        explainBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToPersonActivity(view);
+            }
+        });
+
     }
+
+    public void goToPersonActivity(View view) {
+        if (activeEvent != null) {
+            Intent searchIntent = new Intent(getActivity().getApplicationContext(), PersonActivity.class);
+            Bundle myBundle = new Bundle();
+            //add people with whether they're displayed or not
+            myBundle.putSerializable("personTree", (Serializable) personBinaryTree);
+            myBundle.putSerializable("activeEvent", activeEvent);
+            //add useable events
+            ArrayList<Event> displayedEvents = new ArrayList<>();
+            for (Marker marker : displayedMarkers) {
+                Event currEvent = (Event) marker.getTag();
+                displayedEvents.add(currEvent);
+            }
+            myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+            searchIntent.putExtras(myBundle);
+            searchActivityLauncher.launch(searchIntent);
+        }
+    }
+
+
 
     private void getStoredPreferences() {
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
@@ -245,7 +280,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 }
                 myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
                 searchIntent.putExtras(myBundle);
-                settingsActivityLauncher.launch(searchIntent);
+                searchActivityLauncher.launch(searchIntent);
                 return true;
         }
 
@@ -272,6 +307,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             });
 
     private void resetMap(ActivityResult result) {
+        activeEvent = null;
         System.out.println("OK1!!!! " + result.getResultCode());
         //delete displayedMarkers
         System.out.println("OK!!!!");
@@ -466,6 +502,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         public boolean onMarkerClick(@NonNull Marker marker) {
             //use the tag of the marker to tell what event object it was, use displayedMarkers
             Event currEvent = (Event) marker.getTag();
+            activeEvent = currEvent;
             myMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
             assert currEvent != null;
             System.out.println("Clicked on marker of " + currEvent.getEventType() + "for " + currEvent.getPersonID());
@@ -626,7 +663,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             displayedLines.add(line);
         }
     }
-
 
 
 }

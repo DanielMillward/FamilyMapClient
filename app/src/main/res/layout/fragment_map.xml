@@ -18,7 +18,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         app:columnCount="2"
-        app:rowCount="2">
+        app:rowCount="2"
+        android:clickable="true">
 
         <ImageView
             android:id="@+id/personPic"

@@ -1,6 +1,8 @@
 package com.example.familymapclient;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.SearchView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -55,6 +57,18 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home)  {
+            Intent data = new Intent();
+            setResult(RESULT_OK, data);
+            finish();
+        }
+
+        return true;
+    }
+
 
     private void showNewPeople(String s) {
         //make arraylist of people in personCard form, call recyclerView.updateList(newthing)
