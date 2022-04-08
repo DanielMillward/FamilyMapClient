@@ -5,6 +5,8 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -44,6 +46,9 @@ public class PersonActivity extends AppCompatActivity {
     ArrayList<Event> sortedDisplayedEvents;
     ArrayList<Person> sortedDisplayedPersons;
 
+    FullUser userInfo;
+    UserDataModel userData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +57,8 @@ public class PersonActivity extends AppCompatActivity {
         activeEvent = (Event) getIntent().getExtras().getSerializable("activeEvent");
         personTree = (PersonBinaryTree) getIntent().getExtras().getSerializable("personTree");
         displayedEvents = (ArrayList<Event>) getIntent().getExtras().getSerializable("displayedEvents");
+        userInfo= (FullUser) getIntent().getExtras().getSerializable("userData");
+        userData = userInfo.getUserData();
         displayedPersons = new ArrayList<>();
         displayedPersons = personTree.getAll(personTree);
 
@@ -77,15 +84,27 @@ public class PersonActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
                 if (activeEvent != null) {
-                    Intent searchIntent = new Intent(getApplicationContext(), PersonActivity.class);
-                    Bundle myBundle = new Bundle();
-                    //add people with whether they're displayed or not
-                    myBundle.putSerializable("personTree", (Serializable) personTree);
                     //Find what the active event (or person) is
                     if (i == 1) {
                         //it was an actual event
+                        Bundle myBundle = new Bundle();
+                        //add people with whether they're displayed or not
+                        myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+                        myBundle.putSerializable("personTree", (Serializable) personTree);
+                        myBundle.putSerializable("userData", userInfo);
+                        Intent eventIntent = new Intent(getApplicationContext(), EventActivity.class);
+                        Event actualClickedEvent = sortedDisplayedEvents.get(i1);
+                        myBundle.putSerializable("pastClickedEvent", actualClickedEvent);
+                        eventIntent.putExtras(myBundle);
+                        searchActivityLauncher.launch(eventIntent);
                     } else if (i == 0) {
                         //clicked on a person, assume makeMap func is already called
+                        Bundle myBundle = new Bundle();
+                        //add people with whether they're displayed or not
+                        myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+                        myBundle.putSerializable("personTree", (Serializable) personTree);
+                        myBundle.putSerializable("userData", userInfo);
+                        Intent personIntent = new Intent(getApplicationContext(), PersonActivity.class);
                         Person clickedPerson = sortedDisplayedPersons.get(i1);
                         Event clickedEvent = null;
                         //get an event to pass on
@@ -95,9 +114,8 @@ public class PersonActivity extends AppCompatActivity {
                             }
                         }
                         myBundle.putSerializable("activeEvent", clickedEvent);
-                        myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
-                        searchIntent.putExtras(myBundle);
-                        searchActivityLauncher.launch(searchIntent);
+                        personIntent.putExtras(myBundle);
+                        searchActivityLauncher.launch(personIntent);
                     }
 
 

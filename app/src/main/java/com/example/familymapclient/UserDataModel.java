@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import Models.Event;
 import Models.Person;
 
-public class UserDataModel extends ViewModel implements Serializable, Parcelable {
+public class UserDataModel extends ViewModel implements Serializable{
 
     private boolean wasSuccess;
     private ArrayList<Event> events;
@@ -27,18 +27,6 @@ public class UserDataModel extends ViewModel implements Serializable, Parcelable
     protected UserDataModel(Parcel in) {
         wasSuccess = in.readByte() != 0;
     }
-
-    public static final Creator<UserDataModel> CREATOR = new Creator<UserDataModel>() {
-        @Override
-        public UserDataModel createFromParcel(Parcel in) {
-            return new UserDataModel(in);
-        }
-
-        @Override
-        public UserDataModel[] newArray(int size) {
-            return new UserDataModel[size];
-        }
-    };
 
     public boolean wasSuccess() {
         return wasSuccess;
@@ -64,15 +52,4 @@ public class UserDataModel extends ViewModel implements Serializable, Parcelable
         this.persons = persons;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeByte((byte) (wasSuccess ? 1 : 0));
-
-
-    }
 }

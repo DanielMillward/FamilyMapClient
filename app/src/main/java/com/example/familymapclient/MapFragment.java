@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,8 +72,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     boolean displayFamilyTreeLines;
     TextView eventInfoText;
     TextView personInfoText;
+    ImageView personPicture;
 
     Event activeEvent;
+
+    boolean isEventActivity;
+    Event pastClickedEvent;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -93,6 +98,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         eventInfoText = (TextView) getView().findViewById(R.id.eventInfoText);
         personInfoText = (TextView) getView().findViewById(R.id.personInfoText);
+        personPicture = (ImageView) getView().findViewById(R.id.personPic);
 
         displayedLines = new ArrayList<>();
 
@@ -118,6 +124,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         Bundle bundle = getArguments();
         userInfo= (FullUser) bundle.getSerializable("userData");
         userData = userInfo.getUserData();
+        isEventActivity = (boolean) bundle.getBoolean("isEventActivity");
+        pastClickedEvent = (Event) bundle.getSerializable("pastClickedEvent");
+
         System.out.println("Recieved user data success is " + userData.wasSuccess() +
                 " with events length " + userData.getEvents().size() + " and people length " + userData.getPersons().size());
 
@@ -149,6 +158,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             //add people with whether they're displayed or not
             myBundle.putSerializable("personTree", (Serializable) personBinaryTree);
             myBundle.putSerializable("activeEvent", activeEvent);
+            myBundle.putSerializable("userData", userInfo);
             //add useable events
             ArrayList<Event> displayedEvents = new ArrayList<>();
             for (Marker marker : displayedMarkers) {
@@ -279,6 +289,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                     displayedEvents.add(currEvent);
                 }
                 myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+                myBundle.putSerializable("userData", userData);
                 searchIntent.putExtras(myBundle);
                 searchActivityLauncher.launch(searchIntent);
                 return true;
@@ -339,7 +350,44 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         map.animateCamera(CameraUpdateFactory.newLatLng(sydney));
         System.out.println("About to add stuff to map!");
         addEventsToMap(map);
-        map.setOnMarkerClickListener(new MyMarkerListener(googleMap));
+        MyMarkerListener mapListener = new MyMarkerListener(googleMap);
+        map.setOnMarkerClickListener(mapListener);
+
+        if (isEventActivity && pastClickedEvent != null) {
+            if (displayedLines != null) {
+                for (Polyline line: displayedLines) {
+                    line.remove();
+                }
+            }
+
+            LatLng desiredLocation = new LatLng(pastClickedEvent.getLatitude(),  pastClickedEvent.getLongitude());
+            map.animateCamera(CameraUpdateFactory.newLatLng(desiredLocation));
+            Marker desiredMarker = null;
+            for (Marker marker : displayedMarkers) {
+                Event markerEvent = (Event) marker.getTag();
+                assert markerEvent != null;
+                if (markerEvent.getEventID().equals(pastClickedEvent.getEventID())) {
+                    desiredMarker = marker;
+                }
+            }
+            mapListener.drawEnabledLines(pastClickedEvent, googleMap, desiredMarker);
+
+            Person eventPerson = null;
+            for (Person person : userData.getPersons()) {
+                if (person.getPersonID().equals(pastClickedEvent.getPersonID())) {
+                    eventPerson = person;
+                }
+            }
+
+            personInfoText.setText(eventPerson.getFirstName() + " " + eventPerson.getLastName());
+            eventInfoText.setText(pastClickedEvent.getEventType().toUpperCase() + ": " + pastClickedEvent.getCity()+ ", " + pastClickedEvent.getCountry() + " (" + pastClickedEvent.getYear()+ ")");
+            if (eventPerson.getGender().equals("m")) {
+                personPicture.setImageResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
+            } else if (eventPerson.getGender().equals("f")){
+                personPicture.setImageResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+            }
+
+        }
     }
 
     private void addEventsToMap(GoogleMap map) {
@@ -524,6 +572,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
             personInfoText.setText(firstName + " " + lastName);
             eventInfoText.setText(eventType.toUpperCase() + ": " + eventCity + ", " + eventCountry + " (" + eventYear + ")");
+            if (personNode.getPerson().getGender().equals("m")) {
+                personPicture.setImageResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
+            } else if (personNode.getPerson().getGender().equals("f")){
+                personPicture.setImageResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+            }
         }
 
         private void drawEnabledLines(Event currEvent, GoogleMap myMap, Marker marker) {
@@ -556,8 +609,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         private void recurseDrawFamilyTree(Event currEvent, PersonBinaryTree currPersonSubTree, float width, Marker currMarker) {
             if (currPersonSubTree.left != null && currPersonSubTree.right != null) {
-                int oldestDadYear = 2022;
-                int oldestMomYear = 2022;
+                int oldestDadYear = 9999999;
+                int oldestMomYear = 9999999;
                 Marker oldestDadMarker = null;
                 Marker oldestMomMarker = null;
                 //find the oldest marker for the parents
