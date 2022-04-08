@@ -4,12 +4,12 @@
 
     <item
         android:id="@+id/search_icon"
-        android:icon="@android:drawable/btn_star_big_on"
+        android:icon="@drawable/search_4"
         android:title="Search"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/settings_icon"
-        android:icon="@android:drawable/ic_menu_info_details"
+        android:icon="@drawable/settings_4"
         android:title="Item"
         app:showAsAction="ifRoom" />
 </menu>

@@ -383,9 +383,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             personInfoText.setText(eventPerson.getFirstName() + " " + eventPerson.getLastName());
             eventInfoText.setText(pastClickedEvent.getEventType().toUpperCase() + ": " + pastClickedEvent.getCity()+ ", " + pastClickedEvent.getCountry() + " (" + pastClickedEvent.getYear()+ ")");
             if (eventPerson.getGender().equals("m")) {
-                personPicture.setImageResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
+                personPicture.setImageResource(R.drawable.boy_pic_3);
             } else if (eventPerson.getGender().equals("f")){
-                personPicture.setImageResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+                personPicture.setImageResource(R.drawable.girl_pic_3);
             }
 
         }
@@ -574,9 +574,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             personInfoText.setText(firstName + " " + lastName);
             eventInfoText.setText(eventType.toUpperCase() + ": " + eventCity + ", " + eventCountry + " (" + eventYear + ")");
             if (personNode.getPerson().getGender().equals("m")) {
-                personPicture.setImageResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
+                personPicture.setImageResource(R.drawable.boy_pic_3);
             } else if (personNode.getPerson().getGender().equals("f")){
-                personPicture.setImageResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+                personPicture.setImageResource(R.drawable.girl_pic_3);
             }
         }
 

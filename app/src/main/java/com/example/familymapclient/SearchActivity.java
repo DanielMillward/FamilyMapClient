@@ -83,7 +83,7 @@ public class SearchActivity extends AppCompatActivity {
         ArrayList<PersonCard> newList = new ArrayList<>();
 
         // running a for loop to compare elements.
-        for (Person person : displayedPersons) {
+        for (Person person : userData.getPersons()) {
             // checking if the entered string matched with any item of our recycler view.
             if (person.getFirstName().toLowerCase().contains(s.toLowerCase()) || person.getLastName().toLowerCase().contains(s.toLowerCase())) {
                 // got a match, add it to the thing

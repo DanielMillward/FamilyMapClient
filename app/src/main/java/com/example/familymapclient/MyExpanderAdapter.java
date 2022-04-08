@@ -96,11 +96,11 @@ public class MyExpanderAdapter extends BaseExpandableListAdapter {
         //setting picture
 
         if (cardData.getGender().equals("m")) {
-            personPicture.setBackgroundResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
+            personPicture.setBackgroundResource(R.drawable.boy_pic_3);
         } else if (cardData.getGender().equals("f")){
-            personPicture.setBackgroundResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+            personPicture.setBackgroundResource(R.drawable.girl_pic_3);
         } else {
-            personPicture.setBackgroundResource(com.google.android.material.R.drawable.abc_btn_radio_to_on_mtrl_015);
+            personPicture.setBackgroundResource(R.drawable.location_3);
         }
 
         return view;

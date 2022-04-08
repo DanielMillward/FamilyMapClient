@@ -97,11 +97,11 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
         String pic1_location = "@android:drawable/btn_star_big_on";
 
         if (cardData.getGender().equals("m")) {
-            viewHolder.personPicture.setBackgroundResource(com.google.android.material.R.drawable.ic_clock_black_24dp);
+            viewHolder.personPicture.setBackgroundResource(R.drawable.boy_pic_3);
         } else if (cardData.getGender().equals("f")){
-            viewHolder.personPicture.setBackgroundResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
+            viewHolder.personPicture.setBackgroundResource(R.drawable.girl_pic_3);
         } else {
-            viewHolder.personPicture.setBackgroundResource(com.google.android.material.R.drawable.abc_btn_radio_to_on_mtrl_015);
+            viewHolder.personPicture.setBackgroundResource(R.drawable.location_3);
         }
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +140,7 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
                 Intent personIntent = new Intent(context, PersonActivity.class);
                 //get an event to pass on
                 Event pastClickedEvent = null;
-                for (Event event : displayedEvents) {
+                for (Event event : userInfo.getUserData().getEvents()) {
                     if (event.getPersonID().equals(pastClickedPerson.getPersonID())) {
                         pastClickedEvent = event;
                     }
