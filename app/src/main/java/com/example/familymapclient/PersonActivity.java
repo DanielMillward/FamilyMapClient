@@ -88,6 +88,7 @@ public class PersonActivity extends AppCompatActivity {
 
     private HashMap<String, ArrayList<PersonCard>> makeMapOfExpandableData() {
         ArrayList<PersonCard> eventCards = new ArrayList<>();
+        ArrayList<Event> tempEvents = new ArrayList<>();
         ArrayList<PersonCard> personCards = new ArrayList<>();
         //Finding the person on the tree
         Person activePerson = null;
@@ -105,6 +106,27 @@ public class PersonActivity extends AppCompatActivity {
                     String eventPseudoLastName = " (" + Integer.toString(event.getYear()) + ")";
                     String eventPseudoTitle = activePerson.getFirstName() + " " + activePerson.getLastName();
                     eventCards.add(new PersonCard(eventPseudoName, eventPseudoLastName, eventPseudoTitle, "e"));
+                    tempEvents.add(event);
+                }
+            }
+        }
+        //sorting events by year
+        boolean allDone = false;
+        PersonCard cardTemp;
+        Event eventTemp;
+        while(!allDone) {
+            allDone = true;
+            for (int i = 0; i < tempEvents.size() - 1; ++i) {
+                if (tempEvents.get(i).getYear() > tempEvents.get(i+1).getYear()) {
+                    cardTemp = eventCards.get(i);
+                    eventCards.set(i, eventCards.get(i+1));
+                    eventCards.set(i+1, cardTemp);
+
+                    eventTemp = tempEvents.get(i);
+                    tempEvents.set(i, tempEvents.get(i+1));
+                    tempEvents.set(i+1, eventTemp);
+
+                    allDone = false;
                 }
             }
         }
