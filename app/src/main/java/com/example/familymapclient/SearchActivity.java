@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.SearchView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -112,7 +116,7 @@ public class SearchActivity extends AppCompatActivity {
     private void initializeRecyclerView() {
         // initialize with blank thing since start with no letters
         ArrayList<PersonCard> personCards = new ArrayList<>();
-        adapter = new PersonAdapterClass(personCards, userInfo);
+        adapter = new PersonAdapterClass(personCards, userInfo, displayedEvents, personTree, getApplicationContext(), cardActivityLauncher);
 
         // set the manager for the recycler view and other stuff
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -120,4 +124,13 @@ public class SearchActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
     }
+
+    ActivityResultLauncher<Intent> cardActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                }
+            });
+
 }

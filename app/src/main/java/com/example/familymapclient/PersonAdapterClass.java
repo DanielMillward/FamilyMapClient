@@ -1,28 +1,45 @@
 package com.example.familymapclient;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+
+import Models.Event;
+import Models.Person;
 
 public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.ViewHolder>{
     private ArrayList<PersonCard> personCards;
     int rowIndex=-1;
     FullUser userInfo;
+    ArrayList<Event> displayedEvents;
+    PersonBinaryTree personTree;
+    Context context;
+    ActivityResultLauncher<Intent> cardActivityLauncher;
+
     // Represents data in one person card
     public static class ViewHolder extends RecyclerView.ViewHolder {
         //Represents one person?
         private TextView personName;
         private TextView personTitle;
         private ImageView personPicture;
+        Context context;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -48,9 +65,14 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
     }
 
     //Start the adapter class with ALL people in the recyclerView!
-    public PersonAdapterClass(ArrayList<PersonCard> personCards, FullUser userInfo) {
+    public PersonAdapterClass(ArrayList<PersonCard> personCards, FullUser userInfo,
+                              ArrayList<Event> displayedEvents, PersonBinaryTree personTree, Context context, ActivityResultLauncher<Intent> cardActivityLauncher) {
         this.userInfo = userInfo;
         this.personCards = personCards;
+        this.displayedEvents = displayedEvents;
+        this.personTree = personTree;
+        this.context = context;
+        this.cardActivityLauncher = cardActivityLauncher;
     }
 
     //making one new person card from layout
@@ -95,10 +117,43 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
             boolean wasEventCard;
             if (cardData.getFirstName().contains("(")) {
                 //it was an event
+                Event pastClickedEvent = getEventFromPersonCard(cardData);
+                //it was an actual event
+                Bundle myBundle = new Bundle();
+                Intent eventIntent = new Intent(context, EventActivity.class);
+                //add people with whether they're displayed or not
+                myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+                myBundle.putSerializable("personTree", (Serializable) personTree);
+                myBundle.putSerializable("userData", userInfo);
+                myBundle.putSerializable("pastClickedEvent", pastClickedEvent);
+                eventIntent.putExtras(myBundle);
+                cardActivityLauncher.launch(eventIntent);
             } else {
                 //it was a person
+                Person pastClickedPerson = getPersonFromPersonCard(cardData);
+                //clicked on a person, assume makeMap func is already called
+                Bundle myBundle = new Bundle();
+                //add people with whether they're displayed or not
+                myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+                myBundle.putSerializable("personTree", (Serializable) personTree);
+                myBundle.putSerializable("userData", userInfo);
+                Intent personIntent = new Intent(context, PersonActivity.class);
+                //get an event to pass on
+                Event pastClickedEvent = null;
+                for (Event event : displayedEvents) {
+                    if (event.getPersonID().equals(pastClickedPerson.getPersonID())) {
+                        pastClickedEvent = event;
+                    }
+                }
+                myBundle.putSerializable("activeEvent", pastClickedEvent);
+                personIntent.putExtras(myBundle);
+                cardActivityLauncher.launch(personIntent);
             }
         }
+    }
+
+    private Event getEventFromPersonCard(PersonCard cardData) {
+
     }
 
     // Return the size of your dataset (invoked by the layout manager)
