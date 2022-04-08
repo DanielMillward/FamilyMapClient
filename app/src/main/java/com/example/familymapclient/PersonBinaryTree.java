@@ -126,16 +126,23 @@ public class PersonBinaryTree implements Serializable {
         return temp;
     }
 
-    public ArrayList<Person> getAllDisplayed(PersonBinaryTree personTree, ArrayList<Person> output) {
-        if (personTree != null && personTree.isDisplayed()) {
-            output.add(personTree.getPerson());
-        }
-        if (personTree.left != null) {
-            getAllDisplayed(personTree.getLeft(), output);
-        }
-        if (personTree.right != null) {
-            getAllDisplayed(personTree.getLeft(), output);
-        }
+    public ArrayList<Person> getAllDisplayed(PersonBinaryTree personTree) {
+        ArrayList<Person> output = new ArrayList<>();
+        getAllRecursive(this, output);
         return output;
     }
+
+    private void getAllRecursive(PersonBinaryTree tree, ArrayList<Person> output) {
+        if (tree == null || tree.getPerson() == null) {
+            return;
+        } else {
+            getAllRecursive(tree.left, output);
+            if (tree.isDisplayed()) {
+                output.add(tree.getPerson());
+            }
+            getAllRecursive(tree.right, output);
+        }
+    }
+
+
 }

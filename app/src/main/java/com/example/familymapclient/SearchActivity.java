@@ -35,7 +35,7 @@ public class SearchActivity extends AppCompatActivity {
         personTree = (PersonBinaryTree) getIntent().getExtras().getSerializable("personTree");
         displayedEvents = (ArrayList<Event>) getIntent().getExtras().getSerializable("displayedEvents");
         displayedPersons = new ArrayList<>();
-        displayedPersons = personTree.getAllDisplayed(personTree, displayedPersons);
+        displayedPersons = personTree.getAllDisplayed(personTree);
 
 
         recyclerView = findViewById(R.id.searchRecycle);
