@@ -1,16 +1,26 @@
 package com.example.familymapclient;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.Marker;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import Models.Event;
 import Models.Person;
@@ -30,6 +40,9 @@ public class PersonActivity extends AppCompatActivity {
     TextView firstName;
     TextView lastName;
     TextView gender;
+
+    ArrayList<Event> sortedDisplayedEvents;
+    ArrayList<Person> sortedDisplayedPersons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +76,58 @@ public class PersonActivity extends AppCompatActivity {
         expandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+                if (activeEvent != null) {
+                    Intent searchIntent = new Intent(getApplicationContext(), PersonActivity.class);
+                    Bundle myBundle = new Bundle();
+                    //add people with whether they're displayed or not
+                    myBundle.putSerializable("personTree", (Serializable) personTree);
+                    //Find what the active event (or person) is
+                    if (i == 1) {
+                        //it was an actual event
+                    } else if (i == 0) {
+                        //clicked on a person, assume makeMap func is already called
+                        Person clickedPerson = sortedDisplayedPersons.get(i1);
+                        Event clickedEvent = null;
+                        //get an event to pass on
+                        for (Event event : displayedEvents) {
+                            if (event.getPersonID().equals(clickedPerson.getPersonID())) {
+                                clickedEvent = event;
+                            }
+                        }
+                        myBundle.putSerializable("activeEvent", clickedEvent);
+                        myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+                        searchIntent.putExtras(myBundle);
+                        searchActivityLauncher.launch(searchIntent);
+                    }
+
+
+                }
                 return false;
             }
         });
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home)  {
+            //Intent intent= new Intent(this, MainActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            //startActivity(intent);
+            Intent data = new Intent();
+            setResult(RESULT_OK, data);
+            finish();
+        }
+
+        return true;
+    }
+
+    ActivityResultLauncher<Intent> searchActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                }
+            });
 
     private void setTopInfo() {
         Person activePerson = null;
@@ -131,6 +192,7 @@ public class PersonActivity extends AppCompatActivity {
             }
         }
 
+        ArrayList<Person> tempPersons = new ArrayList<>();
         //Part 2 - adding the person expander
         if (activePerson != null) {
             PersonBinaryTree activeTree = personTree.findNodeFromID(activePerson.getPersonID(), personTree);
@@ -145,15 +207,19 @@ public class PersonActivity extends AppCompatActivity {
 
             if (fatherTree != null) {
                 personCards.add(new PersonCard(fatherTree.getPerson().getFirstName(), fatherTree.getPerson().getLastName(), "father", "m"));
+                tempPersons.add(fatherTree.getPerson());
             }
             if (motherTree != null) {
                 personCards.add(new PersonCard(motherTree.getPerson().getFirstName(), motherTree.getPerson().getLastName(), "mother", "f"));
+                tempPersons.add(motherTree.getPerson());
             }
             if (spouseTree != null) {
                 personCards.add(new PersonCard(spouseTree.getPerson().getFirstName(), spouseTree.getPerson().getLastName(), "spouse", spouseTree.getPerson().getGender()));
+                tempPersons.add(spouseTree.getPerson());
             }
             if (childTree != null) {
                 personCards.add(new PersonCard(childTree.getPerson().getFirstName(), childTree.getPerson().getLastName(), "child", childTree.getPerson().getGender()));
+                tempPersons.add(childTree.getPerson());
             }
         }
 
@@ -161,6 +227,10 @@ public class PersonActivity extends AppCompatActivity {
         HashMap<String, ArrayList<PersonCard>> output = new HashMap<>();
         output.put("Life Events", eventCards);
         output.put("Family", personCards);
+
+        sortedDisplayedEvents = tempEvents;
+        sortedDisplayedPersons = tempPersons;
+
         if (output.size() > 0) {
             return output;
         }

@@ -14,7 +14,10 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".PersonActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:noHistory="true"
+            />
         <activity
             android:name=".SearchActivity"
             android:exported="false"
