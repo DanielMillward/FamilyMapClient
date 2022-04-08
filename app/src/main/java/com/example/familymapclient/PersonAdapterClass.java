@@ -1,5 +1,6 @@
 package com.example.familymapclient;
 
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,8 @@ import java.util.ArrayList;
 
 public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.ViewHolder>{
     private ArrayList<PersonCard> personCards;
-
+    int rowIndex=-1;
+    FullUser userInfo;
     // Represents data in one person card
     public static class ViewHolder extends RecyclerView.ViewHolder {
         //Represents one person?
@@ -28,6 +30,8 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
             personName = itemView.findViewById(R.id.personNameText);
             personTitle = itemView.findViewById(R.id.personTitleText);
             personPicture = itemView.findViewById(R.id.personImage);
+
+            itemView.setClickable(true);
         }
 
         public TextView getPersonText() {
@@ -44,7 +48,8 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
     }
 
     //Start the adapter class with ALL people in the recyclerView!
-    public PersonAdapterClass(ArrayList<PersonCard> personCards) {
+    public PersonAdapterClass(ArrayList<PersonCard> personCards, FullUser userInfo) {
+        this.userInfo = userInfo;
         this.personCards = personCards;
     }
 
@@ -75,6 +80,24 @@ public class PersonAdapterClass extends RecyclerView.Adapter<PersonAdapterClass.
             viewHolder.personPicture.setBackgroundResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark_normal);
         } else {
             viewHolder.personPicture.setBackgroundResource(com.google.android.material.R.drawable.abc_btn_radio_to_on_mtrl_015);
+        }
+
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rowIndex=viewHolder.getAdapterPosition();
+                notifyDataSetChanged();
+            }
+        });
+
+        if(rowIndex==position){
+            //got selected! Now to switch to the respective Person or Event activity
+            boolean wasEventCard;
+            if (cardData.getFirstName().contains("(")) {
+                //it was an event
+            } else {
+                //it was a person
+            }
         }
     }
 

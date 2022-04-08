@@ -166,6 +166,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 displayedEvents.add(currEvent);
             }
             myBundle.putSerializable("displayedEvents", (Serializable) displayedEvents);
+            myBundle.putSerializable("userData", userInfo);
             searchIntent.putExtras(myBundle);
             searchActivityLauncher.launch(searchIntent);
         }

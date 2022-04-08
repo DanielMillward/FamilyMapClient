@@ -27,6 +27,8 @@ public class SearchActivity extends AppCompatActivity {
     ArrayList<Event> displayedEvents;
     androidx.recyclerview.widget.RecyclerView recyclerView;
     PersonAdapterClass adapter;
+    FullUser userInfo;
+    UserDataModel userData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +40,8 @@ public class SearchActivity extends AppCompatActivity {
         displayedEvents = (ArrayList<Event>) getIntent().getExtras().getSerializable("displayedEvents");
         displayedPersons = new ArrayList<>();
         displayedPersons = personTree.getAllDisplayed(personTree);
-
+        userInfo = (FullUser)  getIntent().getExtras().getSerializable("userData");
+        userData = userInfo.getUserData();
 
         recyclerView = findViewById(R.id.searchRecycle);
         initializeRecyclerView();
@@ -109,7 +112,7 @@ public class SearchActivity extends AppCompatActivity {
     private void initializeRecyclerView() {
         // initialize with blank thing since start with no letters
         ArrayList<PersonCard> personCards = new ArrayList<>();
-        adapter = new PersonAdapterClass(personCards);
+        adapter = new PersonAdapterClass(personCards, userInfo);
 
         // set the manager for the recycler view and other stuff
         LinearLayoutManager manager = new LinearLayoutManager(this);
