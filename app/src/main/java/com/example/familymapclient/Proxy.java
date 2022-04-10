@@ -23,7 +23,6 @@ import RequestResult.RegisterResult;
 
 class Proxy {
 
-    //private static final String LOG_TAG = "ClientProxy";
 
     public FullUser getLoginRegisterData(boolean isLogin, String server, String port, LoginRequest loginRequest, RegisterRequest registerRequest) {
         try {
