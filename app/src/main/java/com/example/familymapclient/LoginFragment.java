@@ -399,6 +399,7 @@ public class LoginFragment extends Fragment implements OnMapReadyCallback {
             Proxy httpProxy = new Proxy();
             System.out.println("Proxy made");
             //send off request to server
+            //TODO: Turn this into 2 functions, one that logs in and another that gets the data
             FullUser userData = httpProxy.getLoginRegisterData(isLogin, server, port, loginRequest,registerRequest);
             //send off the data to the activity
             sendMessage(userData);

@@ -136,8 +136,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         SupportMapFragment mapFragment= (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        fillPersonBinaryTree(userData.getPersons(), userInfo.getUserFirstName(), userInfo.getUserLastName());
+        PersonBinaryTree tempTree = new PersonBinaryTree(null, false);
+        personBinaryTree = tempTree.fillPersonBinaryTree(userData.getPersons(), userInfo.getUserFirstName(), userInfo.getUserLastName());
 
         //set onclick listener for bottom view thing
         androidx.gridlayout.widget.GridLayout explainBox = getView().findViewById(R.id.eventInfo);
@@ -185,39 +185,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         displayFamilyTreeLines = sharedPref.getBoolean("FAMILY_TREE_LINES", true);
     }
 
-    private void fillPersonBinaryTree(ArrayList<Person> persons, String firstName, String lastName) {
-        Person user = null;
-        String fatherID;
-        String motherID;
 
 
-        for (Person person : persons) {
-            //find original user
-            if (person.getFirstName() == firstName && person.getLastName() == lastName) {
-                user = person;
-                fatherID = person.getFatherID();
-                motherID = person.getMotherID();
-            }
-            //convert arraylist to dictionary for easier access
-            personMap.put(person.getPersonID(), person);
-        }
 
-        personBinaryTree = new PersonBinaryTree(user, true);
-        addParents(personBinaryTree);
-    }
-
-    private void addParents(PersonBinaryTree tree) {
-        if (tree.getPerson().getFatherID() == null || tree.getPerson().getMotherID() == null) {
-            return;
-        } else {
-            Person father = personMap.get(tree.getPerson().getFatherID());
-            PersonBinaryTree fatherTree = tree.setLeft(new PersonBinaryTree(father, true));
-            addParents(fatherTree);
-            Person mother = personMap.get(tree.getPerson().getMotherID());
-            PersonBinaryTree motherTree = tree.setRight(new PersonBinaryTree(mother, true));
-            addParents(motherTree);
-        }
-    }
 
     public MapFragment() {
         // Required empty public constructor
@@ -398,9 +368,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         //map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 
 
-
-
-
         //TODO: Based on these bools and the tree previously made, decide which ones are displayed
         System.out.println("About to delete some nodes");
         resetTreeDisplay(personBinaryTree);
@@ -408,16 +375,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         displayedLines.clear();
         if (!displayFatherSide) {
             //set the isDisplayed of the person node to false
-            setPersonTreeNodesFalse("father", personBinaryTree.getLeft());
+            personBinaryTree.setPersonTreeNodesFalse("father", personBinaryTree.getLeft());
         }
         if (!displayMotherSide) {
-            setPersonTreeNodesFalse("mother", personBinaryTree.getRight());
+            personBinaryTree.setPersonTreeNodesFalse("mother", personBinaryTree.getRight());
         }
         if (!displayMale) {
-            setPersonTreeNodesFalse("male", personBinaryTree);
+            personBinaryTree.setPersonTreeNodesFalse("male", personBinaryTree);
         }
         if (!displayFemale) {
-            setPersonTreeNodesFalse("female", personBinaryTree);
+            personBinaryTree.setPersonTreeNodesFalse("female", personBinaryTree);
         }
 
         //get the events for the persons that are to be displayed
@@ -442,6 +409,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 displayedMarkers.add(marker);
             } else {
                 //put new color next to it
+                if (colorCounter >= markerColors.length) {
+                    colorCounter = 0;
+                }
                 usedEvents.put(event.getEventType(), markerColors[colorCounter]);
                 Marker  marker = map.addMarker(new MarkerOptions().
                         position(new LatLng(event.getLatitude(), event.getLongitude())).
@@ -464,7 +434,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void getDisplayEvents(PersonBinaryTree tree, ArrayList<Event> output, ArrayList<Event> events) {
-        //go through tree, if it's to be displayed then for every event for this person add to output
+        //if person is displayed, then add every matching event to the output
         if (tree.isDisplayed()) {
             for (Event event : events) {
                 if (event.getPersonID().equals(tree.getPerson().getPersonID())) {
@@ -481,64 +451,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     }
 
-    private void setPersonTreeNodesFalse(String nodeType, PersonBinaryTree tree) {
-        //goes through tree and deletes the respective nodes based on the settings
-        if (tree == null) return;
-        //To do: might be able to combine father/mother since code is basically the same and starts are different
-        //goes through and sets every child to false
-        if (nodeType.equals("father")) {
-            tree.setDisplayed(false);
-            if (tree.left != null && tree.right != null) {
-                tree.getLeft().setDisplayed(false);
-                tree.getRight().setDisplayed(false);
-                System.out.println("Disabled person " + tree.getPerson().getFirstName() + " " + tree.getPerson().getLastName());
-                setPersonTreeNodesFalse("father", tree.getLeft());
-                setPersonTreeNodesFalse("father", tree.getRight());
-            }
-        } else if (nodeType.equals("mother")) {
-            tree.setDisplayed(false);
-            if (tree.left != null && tree.right != null) {
-                tree.getLeft().setDisplayed(false);
-                tree.getRight().setDisplayed(false);
-                System.out.println("Disabled person " + tree.getPerson().getFirstName() + " " + tree.getPerson().getLastName());
-                setPersonTreeNodesFalse("mother", tree.getLeft());
-                setPersonTreeNodesFalse("mother", tree.getRight());
-            }
-        //goes through and sets every male child to false
-        } else if (nodeType.equals("male")) {
-            if (tree.getPerson().getGender().equals("m")) {
-                tree.setDisplayed(false);
-            }
-            if (tree.getRight() != null) {
-                if (tree.getRight().getPerson().getGender().equals("m")) {
-                    tree.getRight().setDisplayed(false);
-                }
-                setPersonTreeNodesFalse("male", tree.getRight());
-            }
-            if (tree.getLeft() != null) {
-                if (tree.getLeft().getPerson().getGender().equals("m")) {
-                    tree.getLeft().setDisplayed(false);
-                }
-                setPersonTreeNodesFalse("male", tree.getLeft());
-            }
-        } else if (nodeType.equals("female")) {
-            if (tree.getPerson().getGender().equals("f")) {
-                tree.setDisplayed(false);
-            }
-            if (tree.getRight() != null) {
-                if (tree.getRight().getPerson().getGender().equals("f")) {
-                    tree.getRight().setDisplayed(false);
-                }
-                setPersonTreeNodesFalse("female", tree.getRight());
-            }
-            if (tree.getLeft() != null) {
-                if (tree.getLeft().getPerson().getGender().equals("f")) {
-                    tree.getLeft().setDisplayed(false);
-                }
-                setPersonTreeNodesFalse("female", tree.getLeft());
-            }
-        }
-    }
+
 
 
     private class MyMarkerListener implements GoogleMap.OnMarkerClickListener {

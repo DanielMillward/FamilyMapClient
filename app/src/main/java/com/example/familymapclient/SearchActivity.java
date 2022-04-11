@@ -81,34 +81,11 @@ public class SearchActivity extends AppCompatActivity {
         //make arraylist of people in personCard form, call recyclerView.updateList(newthing)
 
         ArrayList<PersonCard> newList = new ArrayList<>();
+        GeneralHelper helper = GeneralHelper.getInstance();
 
-        // running a for loop to compare elements.
-        for (Person person : userData.getPersons()) {
-            // checking if the entered string matched with any item of our recycler view.
-            if (person.getFirstName().toLowerCase().contains(s.toLowerCase()) || person.getLastName().toLowerCase().contains(s.toLowerCase())) {
-                // got a match, add it to the thing
-                newList.add(new PersonCard(person.getFirstName(), person.getLastName(), "", person.getGender(), person));
-            }
-        }
-        //now add the events
-        for (Event event: displayedEvents) {
-            //countries, cities, event types, and years
-            if (event.getEventType().toLowerCase().contains(s.toLowerCase()) ||
-                    event.getCountry().toLowerCase().contains(s.toLowerCase()) ||
-                    event.getCity().toLowerCase().contains(s.toLowerCase()) ||
-                    Integer.toString(event.getYear()).contains(s.toLowerCase())) {
-                String eventPseudoName = event.getEventType().toUpperCase() + ": " +
-                        event.getCity() + ", " + event.getCountry();
-                String eventPseudoLastName = " (" + Integer.toString(event.getYear()) + ")";
-                String eventPseudoTitle = "";
-                for (Person person : displayedPersons) {
-                    if (person.getPersonID().equals(event.getPersonID())) {
-                        eventPseudoTitle = person.getFirstName() + " " + person.getLastName();
-                    }
-                }
-                newList.add(new PersonCard(eventPseudoName, eventPseudoLastName, eventPseudoTitle, "e", event));
-            }
-        }
+        newList.addAll(helper.findMatchingPersons(userData, s));
+        newList.addAll(helper.findMatchingEvents(displayedPersons, displayedEvents, s));
+
         adapter.updateList(newList);
 
     }

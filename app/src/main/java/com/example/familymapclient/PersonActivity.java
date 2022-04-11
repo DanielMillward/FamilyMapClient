@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
@@ -189,56 +190,18 @@ public class PersonActivity extends AppCompatActivity {
                 }
             }
         }
-        //sorting events by year
-        boolean allDone = false;
-        PersonCard cardTemp;
-        Event eventTemp;
-        while(!allDone) {
-            allDone = true;
-            for (int i = 0; i < tempEvents.size() - 1; ++i) {
-                if (tempEvents.get(i).getYear() > tempEvents.get(i+1).getYear()) {
-                    cardTemp = eventCards.get(i);
-                    eventCards.set(i, eventCards.get(i+1));
-                    eventCards.set(i+1, cardTemp);
+        GeneralHelper helper = GeneralHelper.getInstance();
+        Pair<ArrayList<Event>, ArrayList<PersonCard>> sortEvents = helper.sortEvents(tempEvents, eventCards);
+        tempEvents = sortEvents.first;
+        eventCards = sortEvents.second;
 
-                    eventTemp = tempEvents.get(i);
-                    tempEvents.set(i, tempEvents.get(i+1));
-                    tempEvents.set(i+1, eventTemp);
-
-                    allDone = false;
-                }
-            }
-        }
 
         ArrayList<Person> tempPersons = new ArrayList<>();
         //Part 2 - adding the person expander
         if (activePerson != null) {
-            PersonBinaryTree activeTree = personTree.findNodeFromID(activePerson.getPersonID(), personTree);
-            //father
-            PersonBinaryTree fatherTree = activeTree.getLeft();
-            //mother
-            PersonBinaryTree motherTree = activeTree.getRight();
-            //spouse
-            PersonBinaryTree spouseTree = activeTree.findSpouseOfPersonFromID(personTree, activePerson.getPersonID());
-            //children
-            PersonBinaryTree childTree = activeTree.findChildFromParentID(activePerson.getPersonID(), personTree);
-
-            if (fatherTree != null) {
-                personCards.add(new PersonCard(fatherTree.getPerson().getFirstName(), fatherTree.getPerson().getLastName(), "father", "m", fatherTree.getPerson()));
-                tempPersons.add(fatherTree.getPerson());
-            }
-            if (motherTree != null) {
-                personCards.add(new PersonCard(motherTree.getPerson().getFirstName(), motherTree.getPerson().getLastName(), "mother", "f", motherTree.getPerson()));
-                tempPersons.add(motherTree.getPerson());
-            }
-            if (spouseTree != null) {
-                personCards.add(new PersonCard(spouseTree.getPerson().getFirstName(), spouseTree.getPerson().getLastName(), "spouse", spouseTree.getPerson().getGender(), spouseTree.getPerson()));
-                tempPersons.add(spouseTree.getPerson());
-            }
-            if (childTree != null) {
-                personCards.add(new PersonCard(childTree.getPerson().getFirstName(), childTree.getPerson().getLastName(), "child", childTree.getPerson().getGender(),childTree.getPerson()));
-                tempPersons.add(childTree.getPerson());
-            }
+            PersonPair personRelatives = personTree.getRelatives(activePerson, personTree);
+           tempPersons = personRelatives.getPersons();
+           personCards = personRelatives.getPersonCards();
         }
 
         //part 3 - actually making the map

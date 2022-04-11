@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -23,11 +24,9 @@ import RequestResult.RegisterResult;
 
 class Proxy {
 
-
     public FullUser getLoginRegisterData(boolean isLogin, String server, String port, LoginRequest loginRequest, RegisterRequest registerRequest) {
         try {
-            //Viewmodel has an object of events and object of persons?
-            System.out.println("Calling getting data...");
+            //Find the right data
             String baseAddress = server + ":" + port;
             String serverAddress;
             if (isLogin) {
@@ -35,48 +34,14 @@ class Proxy {
             } else {
                 serverAddress = baseAddress + "/user/register";
             }
-            //Write our response body
-            //serverAddress = "http://google.com";
-            System.out.println("Server address is " + serverAddress);
+            //Write and send our data
             URL serverURL = new URL(serverAddress);
             HttpURLConnection connection = (HttpURLConnection) serverURL.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-            OutputStreamWriter outStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+            sendRequest(isLogin, connection, loginRequest, registerRequest);
             Gson gson = new Gson();
-            //Add different things to request body depending on if we're logging in or registering
-            if (isLogin) {
-                gson.toJson(loginRequest, outStreamWriter);
-            } else {
-                gson.toJson(registerRequest, outStreamWriter);
-            }
-            System.out.println("Closing resources...");
-            //finish up writing response body
-            outStreamWriter.flush();
-            outStreamWriter.close();
-            //send request
-            System.out.println("About to connect....");
-            connection.connect();
-            System.out.println("Connected!");
             //we got a good response
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                //TODO: Put below in its own function
-
-                // Like before, but get inputStream
-                InputStream responseBody = connection.getInputStream();
-
-                // Read the response bytes
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = responseBody.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, length);
-                }
-                //turn into string
-                String responseData = outputStream.toString();
-                System.out.println("The response to the login or register request:");
-                System.out.println(responseData);
+                String responseData = readDataFromResponse(connection);
                 //turn the string JSON into the object we need
                 if (isLogin) {
                     //ask server for person and event data, add that to viewmodel and return
@@ -91,13 +56,12 @@ class Proxy {
 
             } else {
                 //didn't get a 200, something was wrong about our input, do toast
-                System.out.println("Got a response, but not a 200: " + connection.getResponseCode());
-                return new FullUser(null, null, new UserDataModel(false, null, null));
+                System.out.println("Connected to server, but got this code response: " + connection.getResponseCode());
+                return new FullUser(null, null, null);
             }
         } catch (Exception e) {
             //something went wrong with connecting to the server
-            System.out.println("Couldn't connect to the server! message below for type " + e.getClass());
-            System.out.println(e.getMessage());
+            System.out.println("Couldn't connect to server: " + e.getMessage());
         }
         return null;
     }
@@ -120,7 +84,7 @@ class Proxy {
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 System.out.println("Got response for EVENTS");
                 // Like before, but get inputStream
-                String eventsJSON = getJsonFromResponse(connection);
+                String eventsJSON = readDataFromResponse(connection);
                 loginEventResult = gson.fromJson(eventsJSON, EventArray.class).getList();
             } else {
                 System.out.println("Connected, but got an error getting events for person :(");
@@ -143,7 +107,7 @@ class Proxy {
             if (newConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // Like before, but get inputStream
                 System.out.println("Got response for PERSONS");
-                String personJSON = getJsonFromResponse(newConnection);
+                String personJSON = readDataFromResponse(newConnection);
                 loginPersonResult = gson.fromJson(personJSON, PersonArray.class).getList();
             } else {
                 return new FullUser(null, null, new UserDataModel(false, null, null));
@@ -172,9 +136,9 @@ class Proxy {
         return null;
     }
 
-    private String getJsonFromResponse(HttpURLConnection connection) throws IOException {
-        InputStream responseBody = connection.getInputStream();
 
+    private String readDataFromResponse(HttpURLConnection connection) throws IOException {
+        InputStream responseBody = connection.getInputStream();
         // Read the response bytes
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
@@ -182,9 +146,27 @@ class Proxy {
         while ((length = responseBody.read(buffer)) != -1) {
             outputStream.write(buffer, 0, length);
         }
-        //turn into string
-        String responseData = outputStream.toString();
-        return responseData;
+        return outputStream.toString();
     }
+
+    private void sendRequest(boolean isLogin, HttpURLConnection connection, LoginRequest loginRequest, RegisterRequest registerRequest) throws IOException {
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+        OutputStreamWriter outStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+        Gson gson = new Gson();
+        //Add different things to request body depending on if we're logging in or registering
+        if (isLogin) {
+            gson.toJson(loginRequest, outStreamWriter);
+        } else {
+            gson.toJson(registerRequest, outStreamWriter);
+        }
+        //finish up writing response body
+        outStreamWriter.flush();
+        outStreamWriter.close();
+        //send request
+        connection.connect();
+    }
+
 }
 
