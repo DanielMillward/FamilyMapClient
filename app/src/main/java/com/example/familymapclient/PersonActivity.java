@@ -49,6 +49,7 @@ public class PersonActivity extends AppCompatActivity {
 
     FullUser userInfo;
     UserDataModel userData;
+    Person userPerson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,12 @@ public class PersonActivity extends AppCompatActivity {
         userData = userInfo.getUserData();
         displayedPersons = new ArrayList<>();
         displayedPersons = personTree.getAllDisplayed(personTree);
+
+        for (Person person : displayedPersons) {
+            if (person.getFirstName().equals(userInfo.getUserFirstName()) && person.getLastName().equals(userInfo.getUserLastName())) {
+                userPerson = person;
+            }
+        }
 
         firstName = (TextView) findViewById(R.id.personFirstName);
         lastName = (TextView) findViewById(R.id.personLastName);
@@ -199,7 +206,7 @@ public class PersonActivity extends AppCompatActivity {
         ArrayList<Person> tempPersons = new ArrayList<>();
         //Part 2 - adding the person expander
         if (activePerson != null) {
-            PersonPair personRelatives = personTree.getRelatives(activePerson, personTree);
+            PersonPair personRelatives = personTree.getRelatives(userData, activePerson, personTree, userPerson);
            tempPersons = personRelatives.getPersons();
            personCards = personRelatives.getPersonCards();
         }

@@ -33,6 +33,8 @@ public class GeneralTest {
     Person sheilaPerson;
     Person sheilaParent;
 
+    FullUser fullUser;
+
     @Before
     public void generalSetUp() {
         Proxy proxy = new Proxy();
@@ -54,7 +56,7 @@ public class GeneralTest {
         sheilaPerson = new Person("Sheila_Parker", "sheila",
                 "Sheila", "Parker", "f", "Blaine_McGary", "Betty_White", "Davis_Hyer");
         LoginRequest loginRequest = new LoginRequest(user.getUsername(), user.getPassword());
-        FullUser fullUser = proxy.getLoginRegisterData(true, "http://localhost", "8080",
+        fullUser = proxy.getLoginRegisterData(true, "http://localhost", "8080",
                 loginRequest, null);
 
         retrievedPersons = fullUser.getUserData().getPersons();
@@ -79,7 +81,7 @@ public class GeneralTest {
     public void getFamilyRelationsPass() {
         //Has all 4 (mother/father/spouse/child)
         //binarytree relations
-        PersonPair personRelatives = tree.getRelatives(sheilaParent, tree);
+        PersonPair personRelatives = tree.getRelatives(fullUser.getUserData(), sheilaParent, tree, sheilaPerson);
         ArrayList<Person> fatherRelatives = personRelatives.getPersons();
         System.out.println("temp");
         Person father = fatherRelatives.get(0);
@@ -93,9 +95,19 @@ public class GeneralTest {
     }
 
     @Test
-    public void getFamilyRelationsFail() {
-        //Only spouse and child
-        //Only parents
+    public void getFamilyRelationsTwo() {
+        //No spouse
+        PersonPair personRelatives = tree.getRelatives(fullUser.getUserData(),sheilaPerson, tree, sheilaPerson);
+        ArrayList<Person> sheilaRelatives = personRelatives.getPersons();
+        assertEquals(3, sheilaRelatives.size());
+        Person father = sheilaRelatives.get(0);
+        Person mother = sheilaRelatives.get(1);
+        Person spouse = sheilaRelatives.get(2);
+        assertEquals("Blaine_McGary", father.getPersonID());
+        assertEquals("Betty_White", mother.getPersonID());
+        assertEquals("Davis_Hyer", spouse.getPersonID());
+        //No parents
+
     }
 
     @Test

@@ -390,7 +390,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         //get the events for the persons that are to be displayed
         ArrayList<Event> displayEvents = new ArrayList<>();
         getDisplayEvents(personBinaryTree, displayEvents, userData.getEvents());
-
+        //Add spouse events of root
+        if (personBinaryTree.getPerson().getSpouseID() != null) {
+            for (Event event : userData.getEvents()) {
+                if (event.getPersonID().equals(personBinaryTree.getPerson().getSpouseID())) {
+                    if (personBinaryTree.getPerson().getGender().equals("m") && displayFemale) {
+                        displayEvents.add(event);
+                    } else if ((personBinaryTree.getPerson().getGender().equals("f") && displayMale)) {
+                        displayEvents.add(event);
+                    }
+                }
+            }
+        }
 
         //events already with a color
         Map<String, Float> usedEvents = new HashMap<>();
@@ -398,7 +409,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         //make list of events that the settings tell us to use
         ArrayList<Event> displayedEvents = new ArrayList<>();
 
-        for (Event event : displayEvents){
+        for (Event event : displayEvents) {
             //if event Type has not been assigned a color already, set a new one/reuse, else use set
             if (usedEvents.containsKey(event.getEventType())) {
                 //already have a color, assign it
@@ -421,6 +432,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 colorCounter++;
             }
         }
+
     }
 
     private void resetTreeDisplay(PersonBinaryTree tree) {
@@ -476,7 +488,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         private void setInfoText(Event currEvent) {
-            PersonBinaryTree personNode = personBinaryTree.findNodeFromID(currEvent.getPersonID(), personBinaryTree);
+            PersonBinaryTree personNode = null;
+            if (currEvent.getPersonID().equals(personBinaryTree.getPerson().getSpouseID())) {
+                for (Person person : userData.getPersons()) {
+                    if (person.getPersonID().equals(personBinaryTree.getPerson().getSpouseID())) {
+                        personNode = new PersonBinaryTree(person, true);
+                    }
+                }
+            } else {
+                personNode = personBinaryTree.findNodeFromID(currEvent.getPersonID(), personBinaryTree);
+            }
+
             String firstName = personNode.getPerson().getFirstName();
             String lastName = personNode.getPerson().getLastName();
             String eventType = currEvent.getEventType();
@@ -522,6 +544,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         private void recurseDrawFamilyTree(Event currEvent, PersonBinaryTree currPersonSubTree, float width, Marker currMarker) {
+            if (currPersonSubTree == null) return;
             if (currPersonSubTree.left != null && currPersonSubTree.right != null) {
                 int oldestDadYear = 9999999;
                 int oldestMomYear = 9999999;
@@ -579,7 +602,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         private void drawSpouseLines(String currPersonID, Marker currMarker) {
-            PersonBinaryTree currTree= personBinaryTree.findSpouseOfPersonFromID(personBinaryTree, currPersonID);
+            if (currPersonID.equals(personBinaryTree.getPerson().getSpouseID())){
+                int oldestYear = 2022;
+                Marker oldestMarker = null;
+                for (Marker marker : displayedMarkers) {
+                    //Iterate through all markers, if it belongs to spouse, and is oldest, set as marker
+
+                    Event markerEvent = (Event) marker.getTag();
+                    if (markerEvent.getPersonID().equals(personBinaryTree.getPerson().getPersonID())) {
+                        if (markerEvent.getYear()  < oldestYear) {
+                            oldestYear = markerEvent.getYear();
+                            oldestMarker = marker;
+                        }
+                    }
+                }
+                drawLineGivenMarkers(myMap, currMarker, oldestMarker, 0xffff0000, 10F);
+            }
+
+            PersonBinaryTree currTree= personBinaryTree.findSpouseOfPersonFromID(userData, personBinaryTree, currPersonID, personBinaryTree.getPerson());
+
             Person currPersonSpouse = null;
             if (currTree == null) {
                 return;

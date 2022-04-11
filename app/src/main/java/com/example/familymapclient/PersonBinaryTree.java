@@ -2,6 +2,8 @@ package com.example.familymapclient;
 
 
 
+import android.service.autofill.UserData;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,10 +58,16 @@ public class PersonBinaryTree implements Serializable {
         isDisplayed = displayed;
     }
 
-    public PersonBinaryTree findSpouseOfPersonFromID(PersonBinaryTree tree, String currPersonID) {
+    public PersonBinaryTree findSpouseOfPersonFromID(UserDataModel userData, PersonBinaryTree tree, String currPersonID, Person rootPerson) {
         //assumes we are in the root
-        if (tree == null || tree.getPerson().getPersonID().equals(currPersonID)) {
-            return null;
+        if (tree == null || rootPerson.getPersonID().equals(currPersonID)) {
+            if (rootPerson.getSpouseID() != null) {
+                for (Person person : userData.getPersons()) {
+                    if (person.getPersonID().equals(rootPerson.getSpouseID())) {
+                        return new PersonBinaryTree(person, true);
+                    }
+                }
+            }
         }
         if (tree.getLeft() != null && tree.getLeft().getPerson().getPersonID().equals(currPersonID)) {
             System.out.println("Found spouse! " + tree.getRight().getPerson().getPersonID());
@@ -69,11 +77,11 @@ public class PersonBinaryTree implements Serializable {
             System.out.println("Found spouse! " + tree.getLeft().getPerson().getPersonID());
             return tree.getLeft();
         }
-        PersonBinaryTree temp = findSpouseOfPersonFromID(tree.getLeft(), currPersonID);
+        PersonBinaryTree temp = findSpouseOfPersonFromID(userData, tree.getLeft(), currPersonID, rootPerson);
         if (temp != null) {
             return temp;
         }
-        temp = findSpouseOfPersonFromID(tree.getRight(), currPersonID);
+        temp = findSpouseOfPersonFromID(userData, tree.getRight(), currPersonID, rootPerson);
         return temp;
 
     }
@@ -164,19 +172,26 @@ public class PersonBinaryTree implements Serializable {
         }
     }
 
-    public PersonPair getRelatives(Person activePerson, PersonBinaryTree personTree) {
+    public PersonPair getRelatives(UserDataModel userData, Person activePerson, PersonBinaryTree personTree, Person rootPerson) {
         //returns relatives found in order: father, mother, spouse, child
         //The second arraylist is just the PersonCard version of the first
 
         ArrayList<PersonCard> personCards = new ArrayList<>();
         ArrayList<Person> tempPersons = new ArrayList<>();
+        if (rootPerson.getSpouseID().equals(activePerson.getPersonID())) {
+            String spouseGender = rootPerson.getGender().equals("m")? "f" : "m";
+            personCards.add(new PersonCard(rootPerson.getFirstName(), rootPerson.getLastName(), "spouse", spouseGender,rootPerson));
+            tempPersons.add(rootPerson);
+            PersonPair output = new PersonPair(tempPersons, personCards);
+            return output;
+        }
         PersonBinaryTree activeTree = personTree.findNodeFromID(activePerson.getPersonID(), personTree);
         //father
         PersonBinaryTree fatherTree = activeTree.getLeft();
         //mother
         PersonBinaryTree motherTree = activeTree.getRight();
         //spouse
-        PersonBinaryTree spouseTree = activeTree.findSpouseOfPersonFromID(personTree, activePerson.getPersonID());
+        PersonBinaryTree spouseTree = activeTree.findSpouseOfPersonFromID(userData, personTree, activePerson.getPersonID(), rootPerson);
         //children
         PersonBinaryTree childTree = activeTree.findChildFromParentID(activePerson.getPersonID(), personTree);
 
@@ -225,6 +240,7 @@ public class PersonBinaryTree implements Serializable {
             }
             //goes through and sets every male child to false
         } else if (nodeType.equals("male")) {
+            //TODO: Add spouse tree checking
             if (tree.getPerson().getGender().equals("m")) {
                 tree.setDisplayed(false);
             }
