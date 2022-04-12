@@ -198,9 +198,9 @@ public class PersonActivity extends AppCompatActivity {
             }
         }
         GeneralHelper helper = GeneralHelper.getInstance();
-        Pair<ArrayList<Event>, ArrayList<PersonCard>> sortEvents = helper.sortEvents(tempEvents, eventCards);
-        tempEvents = sortEvents.first;
-        eventCards = sortEvents.second;
+        EventPair sortEvents = helper.sortEvents(tempEvents, eventCards);
+        tempEvents = sortEvents.getEvents();
+        eventCards = sortEvents.getPersonCards();
 
 
         ArrayList<Person> tempPersons = new ArrayList<>();

@@ -21,7 +21,7 @@ public class GeneralHelper {
         return oneInstance;
     }
 
-    public Pair<ArrayList<Event>, ArrayList<PersonCard>> sortEvents(ArrayList<Event> tempEvents, ArrayList<PersonCard> eventCards) {
+    public EventPair sortEvents(ArrayList<Event> tempEvents, ArrayList<PersonCard> eventCards) {
         //sorting events by year
         boolean allDone = false;
         PersonCard cardTemp;
@@ -42,7 +42,7 @@ public class GeneralHelper {
                 }
             }
         }
-        return new Pair<>(tempEvents, eventCards);
+        return new EventPair(tempEvents, eventCards);
     }
 
     public ArrayList<PersonCard> findMatchingPersons(UserDataModel userData, String s) {
